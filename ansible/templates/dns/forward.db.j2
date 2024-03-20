@@ -14,11 +14,11 @@ $TTL 86400
 ns1       IN  A       {{ server_ip }}
 
 ;Mail exchanger
-itzgeek.local. IN  MX 10   mail.{{ domain }}.
+{{ domain }}. IN  MX 10   mail.{{ domain }}.
 
 ;A - Record HostName To Ip Address
-www     IN  A       192.168.0.101
-mail    IN  A       192.168.0.150
+www     IN  A       192.168.1.101
+mail    IN  A       192.168.1.150
 
 ;CNAME record
 ftp     IN CNAME        www.{{ domain }}.

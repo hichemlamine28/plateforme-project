@@ -47,12 +47,21 @@
     - name: Restart Networkmanager
       ansible.builtin.shell: sudo systemctl restart NetworkManager
 
-    - name: Ajouter la ligne nameserver dans /etc/resolv.conf
+    # - name: Ajouter la ligne nameserver dans /etc/resolv.conf
+    #   lineinfile:
+    #     path: /etc/resolv.conf
+    #     # line: "nameserver {{ server_ip }}"
+    #     line: "nameserver 192.168.56.1"
+    #     insertafter: EOF
+    #   become: yes
+
+    - name: Remplacer le contenu de /etc/resolv.conf
       lineinfile:
         path: /etc/resolv.conf
-        line: "nameserver {{ server_ip }}"
-        insertafter: EOF
-      become: yes
+        regexp: '^nameserver'
+        line: 'nameserver 192.168.56.72'
+        state: present
+      become: true
 
   # handlers:
     - name: Reload BIND
