@@ -8,15 +8,15 @@
 //
 
 options {
-	listen-on port 53 { 127.0.0.1; {{server_ip}}; };
-	listen-on-v6 port 53 { ::1; };
+	listen-on port 53 { 127.0.0.1; 192.168.1.100;any; };
+//	listen-on-v6 port 53 { ::1; };
 	directory 	"/var/named";
 	dump-file 	"/var/named/data/cache_dump.db";
 	statistics-file "/var/named/data/named_stats.txt";
 	memstatistics-file "/var/named/data/named_mem_stats.txt";
 	secroots-file	"/var/named/data/named.secroots";
 	recursing-file	"/var/named/data/named.recursing";
-	allow-query     { localhost; 192.168.56.0/24; any; };
+	allow-query     { localhost;{{ mask }}/24; };
 
 	/* 
 	 - If you are building an AUTHORITATIVE DNS server, do NOT enable recursion.
@@ -55,15 +55,23 @@ zone "." IN {
 };
 
 
-zone "{{ domain }}" IN {
-    type master;
-    file "{{ zones_dir }}/forward.zone";
+
+//Forward Zone
+zone "{{ domain }}" IN { 
+
+           type master;  
+           file "forward.db"; 
+           allow-update { none; };  
 };
 
-zone "{{ reverse_zone }}" IN {
-    type master;
-    file "{{ zones_dir }}/reverse.zone";
+//Reverse Zone
+zone "{{ reverse_zone }}.in-addr.arpa" IN { 
+
+             type master;  
+             file "reverse.db";             
+             allow-update { none; };
 };
+
 
 
 include "/etc/named.rfc1912.zones";
