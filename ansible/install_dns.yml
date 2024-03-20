@@ -10,8 +10,8 @@
     dns_forwarders:
       - 8.8.8.8
       - 8.8.4.4
-    domain: "devops.fr"
-    reverse_zone: "1.168.192.in-addr.arpa"
+    domain: "devops.local"
+    reverse_zone: "1.168.192"
     server_ip: "192.168.1.100"
     server_ip_reversed: "100"
     mask: "192.168.1.0"
@@ -35,7 +35,17 @@
       with_items:
         - { src: "templates/dns/forward.db.j2", dest: "forward.db" }
         - { src: "templates/dns/reverse.db.j2", dest: "reverse.db" }
-      notify: Reload BIND
+      # notify: Reload BIND
+
+    - name: Changer owner et chmod pour fichiers de zone
+      ansible.builtin.shell: |
+        sudo chmod 640 /var/named/forward.db
+        sudo chmod 640 /var/named/reverse.db
+        sudo chown named:named /var/named/forward.db
+        sudo chown named:named /var/named/reverse.db
+
+    - name: Restart Networkmanager
+      ansible.builtin.shell: sudo systemctl restart NetworkManager
 
     - name: Ajouter la ligne nameserver dans /etc/resolv.conf
       lineinfile:
@@ -44,14 +54,7 @@
         insertafter: EOF
       become: yes
 
-    - name: Copier les fichiers de zone
-      ansible.builtin.shell: |
-        sudo chmod 640 /var/named/forward.db
-        sudo chmod 640 /var/named/reverse.db
-        sudo chown named:named /var/named/forward.db
-        sudo chown named:named /var/named/reverse.db
-
-  handlers:
+  # handlers:
     - name: Reload BIND
       systemd:
         name: "{{ named_service }}"

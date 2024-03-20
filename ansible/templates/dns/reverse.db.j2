@@ -8,10 +8,11 @@ $TTL 86400
 )
 
 ;Name Server Information
-@         IN      NS         ns1.{{domain}}.
+@         IN      NS         ns1.{{ domain }}.
 
 ;Reverse lookup for Name Server
-{{ server_ip_reversed }}       IN  PTR     ns1.{{ domain }}.
+{{ server_ip_reversed }}        IN  PTR     ns1.{{ domain }}.
 
 ;PTR Record IP address to HostName
-101      IN  PTR     www.devops6080.local.
+101      IN  PTR     www.itzgeek.local.
+150      IN  PTR     mail.itzgeek.local.
