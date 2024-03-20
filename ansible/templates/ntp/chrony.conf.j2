@@ -1,0 +1,10 @@
+# chrony.conf.j2
+
+# Use public NTP servers
+server 0.centos.pool.ntp.org iburst
+server 1.centos.pool.ntp.org iburst
+server 2.centos.pool.ntp.org iburst
+server 3.centos.pool.ntp.org iburst
+
+# Allow NTP client access from this subnet
+allow 192.168.1.0/24

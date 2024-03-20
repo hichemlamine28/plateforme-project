@@ -1,0 +1,44 @@
+---
+- name: Installer et configurer un serveur DNS sur CentOS 8
+  hosts: dns
+  become: true
+  vars:
+    named_conf_path: "/etc/named.conf"
+    zones_dir: "/var/named/"
+    named_service: "named"
+    dns_port: 53
+    dns_forwarders:
+      - 8.8.8.8
+      - 8.8.4.4
+    domain: "devops.fr"
+    reverse_zone: "56.168.192.in-addr.arpa"
+    server_ip: "192.168.56.72"
+    server_ip_reversed: "72"
+
+  tasks:
+    - name: Installer le paquet bind
+      package:
+        name: bind
+        state: present
+
+    - name: Copier la configuration named.conf
+      template:
+        src: templates/dns/named.conf.j2
+        dest: "{{ named_conf_path }}"
+      notify: Reload BIND
+
+    - name: Copier les fichiers de zone
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ zones_dir }}/{{ item.dest }}"
+      with_items:
+        - { src: "templates/dns/forward.zone.j2", dest: "forward.zone" }
+        - { src: "templates/dns/reverse.zone.j2", dest: "reverse.zone" }
+      notify: Reload BIND
+
+  handlers:
+    - name: Reload BIND
+      systemd:
+        name: "{{ named_service }}"
+        state: restarted
+        enabled: true

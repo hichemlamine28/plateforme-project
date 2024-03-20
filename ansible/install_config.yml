@@ -1,0 +1,77 @@
+- hosts: all
+  become: true
+  tasks:
+  - name: Fix mirrors / repos
+    ansible.builtin.shell: |
+      cd /etc/yum.repos.d/
+      sudo sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+      sudo sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+      # wget 'http://mirror.centos.org/centos/8-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-8-3.el8.noarch.rpm'
+      # sudo rpm -i 'centos-gpg-keys-8-3.el8.noarch.rpm'
+      # sudo dnf --disablerepo '*' --enablerepo=extras swap centos-linux-repos centos-stream-repos 
+      # sudo dnf distro-sync
+
+- hosts: all
+  become: true
+  serial: 1  # Nombre de VM à mettre à jour simultanément
+  # gather_facts: no
+  tasks:
+  - name: Update yum
+    ansible.builtin.yum:
+      name: '*'
+      state: latest
+      update_cache: yes
+
+  - name: Install epel-release
+    ansible.builtin.yum:
+      name: epel-release
+      state: present
+
+  - name: Attendre que les machines soient de nouveau accessibles
+    ansible.builtin.wait_for_connection:
+      delay: 2  # Attendre 30 secondes avant de vérifier à nouveau la connexion
+      timeout: 300  # Temps maximal d'attente pour que la connexion soit rétablie (300 secondes)
+  
+- hosts: all
+  become: true
+  serial: 1  # Nombre de VM à mettre à jour simultanément
+  # gather_facts: no
+  tasks:
+  - name: Fix locale and LANG packs
+    ansible.builtin.shell: |
+      localectl set-locale LANG=en_US.UTF-8
+      sudo dnf install langpacks-en glibc-all-langpacks -y
+      sudo dnf install glibc-langpack-en -y
+
+  - name: Install packages
+    ansible.builtin.shell: |
+      sudo yum install -y httpd httpd-tools php gcc glibc glibc-common gd gd-devel make net-snmp
+      sudo dnf config-manager --set-enabled powertools
+      sudo dnf install epel-release epel-next-release -y
+
+  - name: Installation des outils d'administration sur les VMs
+    yum:
+      name:
+        - mlocate
+        - nano
+        - sysstat
+        - lsof
+        - telnet
+        - net-tools
+        - bind-utils
+        - nmap
+      state: present
+
+  # - name: Fix ssh problem on restart 
+  #   ansible.builtin.shell: |
+  #     sudo dnf -y install centos-release-stream
+  #     sudo dnf -y swap centos-{linux,stream}-repos
+  #     sudo dnf -y distro-sync
+  #     sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+  #     sudo dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+  #     sudo dnf -y install yum-utils
+  #     sudo dnf module reset php -y
+  #     sudo dnf module enable php:remi-8.3 -y
+  #     sudo dnf update -y  #sudo dnf update -y --skip-broken --allowerasing
+  #     sudo dnf install php -y

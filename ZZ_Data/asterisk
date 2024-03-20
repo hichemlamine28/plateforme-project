@@ -1,0 +1,431 @@
+yum -y update
+yum -y install nano wget epel-release tar
+sed -i s/SELINUX=enforcing/SELINUX=disabled/g /etc/selinux/config
+setenforce 0
+cd /usr/src
+wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-18-current.tar.gz
+tar zxvf asterisk-18-current.tar.gz
+rm -rf asterisk-18-current.tar.gz
+cd asterisk-18*/
+contrib/scripts/install_prereq install
+yum -y install ncurses-devel
+dnf --enablerepo=powertools install libedit-devel
+./configure --libdir=/usr/lib64
+make && make install && make samples
+mkdir /etc/asterisk/samples
+mv /etc/asterisk/*.*  /etc/asterisk/samples/
+make basic-pbx
+make config
+echo "######################"
+echo "# Install completed! #"
+echo "######################"
+
+
+
+
+# install wget
+yum -y install wget
+
+# download the installer file
+cd /usr/src/
+wget https://files.hotkey404.com/blog/asterisk-18-centos-stream-8-install.sh
+
+# make it executable
+chmod +x asterisk-18-centos-stream-8-install.sh
+
+# execute file
+./asterisk-18-centos-stream-8-install.sh
+
+
+
+
+##############################################"
+sudo dnf -y update
+sudo setenforce 0
+sudo sed -i 's/\(^SELINUX=\).*/\SELINUX=permissive/' /etc/selinux/config
+
+sudo yum -y install epel-release
+sudo yum config-manager --set-enabled powertools
+
+sudo dnf -y groupinstall "Development Tools"
+sudo dnf install -y tftp-server ncurses-devel sendmail sendmail-cf newt-devel libxml2-devel libtiff-devel gtk2-devel subversion kernel-devel git crontabs cronie cronie-anacron wget vim  sqlite-devel net-tools gnutls-devel unixODBC
+
+
+Étape 3 – Installer le serveur de base de données MariaDB
+FreePBX nécessite un serveur de base de données pour les configurations et le stockage des données. Utilisez le guide sur le lien ci-dessous pour installer et configurer le serveur de base de données MariaDB.
+    Comment installer MariaDB sur RHEL/CentOS 8
+
+
+sudo dnf install MariaDB-server MariaDB-client --disablerepo=AppStream 
+sudo systemctl start mariadb & systemctl enable mariadb
+
+
+sudo dnf -y module install nodejs
+
+sudo dnf -y install @httpd
+
+sudo rm -f /var/www/html/index.html
+sudo rm /etc/httpd/conf.d/welcome.conf
+
+sudo systemctl enable --now httpd
+
+sudo dnf -y install yum-utils
+sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+sudo dnf module -y reset php
+
+
+sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm -y
+
+sudo dnf module reset php -y
+sudo dnf module install php:remi-7.4 -y
+sudo yum install yum-utils -y
+
+sudo dnf module -y install php
+
+#########################################
+dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+dnf -y install yum-utils
+dnf module reset php
+dnf module enable php:remi-8.2
+dnf update  #sudo dnf update --skip-broken --allowerasing
+dnf install php
+php -v
+#################################################
+
+
+
+sudo dnf install -y wget php php-pear php-cgi php-common php-curl php-mbstring php-gd php-mysqlnd php-gettext php-bcmath php-zip php-xml  php-json php-process php-snmp
+
+sudo pear install Console_Getopt
+
+sudo sed -i 's/\(^upload_max_filesize = \).*/\l20M/' /etc/php.ini
+sudo sed -i 's/\(^upload_max_filesize = \).*/\1128M/' /etc/php.ini
+
+
+sudo systemctl restart php-fpm httpd
+sudo systemctl enable php-fpm httpd
+
+
+
+
+sudo sed -i 's/\(^memory_limit = \).*/\1128M/' /etc/php.ini
+sudo sed -i 's/^\(User\|Group\).*/\1 asterisk/' /etc/httpd/conf/httpd.conf
+sudo sed -i 's/AllowOverride None/AllowOverride All/' /etc/httpd/conf/httpd.conf
+sudo sed -i 's/\(^user = \).*/\1asterisk/' /etc/php-fpm.d/www.conf
+sudo sed -i 's/\(^group = \).*/\1asterisk/' /etc/php-fpm.d/www.conf
+sudo sed -i 's/\(^listen.acl_users = \).*/\1apache,nginx,asterisk/' /etc/php-fpm.d/www.conf
+
+
+
+
+wget http://mirror.freepbx.org/modules/packages/freepbx/7.4/freepbx-16.0-latest.tgz
+
+tar xfz freepbx-16.0-latest.tgz
+
+cd freepbx
+sudo systemctl stop asterisk
+sudo ./start_asterisk start
+sudo ./install -n
+
+
+
+
+
+##############   Fix update ssh problem on restart ############""
+sudo dnf -y install centos-release-stream
+sudo dnf -y swap centos-{linux,stream}-repos
+sudo dnf -y distro-sync
+sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo dnf -y install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+sudo dnf -y install yum-utils
+sudo dnf module reset php -y
+sudo dnf module enable php:remi-8.3 -y
+sudo dnf update -y  #sudo dnf update -y --skip-broken --allowerasing
+sudo dnf install php -y
+
+
+
+
+
+
+##############################
+asterisk16 + freepbx 14
+##############################
+
+sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+sudo setenforce 0
+sudo yum -y install epel-release gcc-c++ ncurses-devel libxml2-devel wget openssl-devel newt-devel kernel-devel sqlite-devel libuuid-devel gtk2-devel jansson-devel binutils-devel bzip2 patch libedit libedit-devel tftp-server ncurses-devel sendmail sendmail-cf sox newt-devel libxml2-devel libtiff-devel audiofile-devel gtk2-devel subversion kernel-devel git crontabs cronie cronie-anacron wget vim nano uuid-devel sqlite-devel net-tools
+
+# sudo firewall-cmd --zone=public --permanent --add-service={sip,sips}
+# sudo firewall-cmd --zone=public --permanent --add-port=10000-20000/udp
+# sudo firewall-cmd --zone=public --permanent --add-port=4569/udp
+# sudo firewall-cmd --permanent --list-services
+# sudo firewall-cmd --permanent --list-ports
+
+mkdir ~/build-asterisk
+cd ~/build-asterisk
+
+
+wget https://github.com/pjsip/pjproject/archive/refs/tags/2.14.1.tar.gz
+tar -xzf 2.14.1.tar.gz
+cd pjproject-2.14.1
+./configure CFLAGS="-DNDEBUG -DPJ_HAS_IPV6=1" --prefix=/usr --libdir=/usr/lib64 --enable-shared --disable-video --disable-sound --disable-opencore-amr
+make dep
+make
+sudo make install
+sudo ldconfig
+
+cd ..
+wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-21.2.0.tar.gz
+wget http://downloads.asterisk.org/pub/telephony/asterisk/old-releases/asterisk-16.9.0.tar.gz
+wget http://downloads.asterisk.org/pub/telephony/asterisk/old-releases/asterisk-16.30.1.tar.gz
+wget http://downloads.asterisk.org/pub/telephony/asterisk/old-releases/asterisk-16.0.0.tar.gz
+tar xzvf asterisk-21.2.0.tar.gz
+cd cd asterisk-21.2.0
+
+
+
+sudo yum install svn
+contrib/scripts/get_mp3_source.sh
+
+
+sudo ./contrib/scripts/install_prereq install
+./configure --libdir=/usr/lib64 --with-jansson-bundled
+make
+sudo make install
+sudo make samples
+sudo make basic-pbx
+sudo make basic-pbx
+#sudo make progdocs  # takes too much time
+sudo make config
+
+################ freepbx ###########
+
+sudo yum install -y php php-mysqlnd php-mbstring php-process php-gd php-json php-xml php-devel php-opcache php-devel php-intl php-mbstring php-pear php-process mariadb-server mariadb httpd gnutls-devel unixODBC
+sudo pear install Console_Getopt
+
+#sudo rm -rf  /var/lib/mysql/*
+sudo systemctl start mariadb
+mysql_secure_installation
+
+"""
+Enter current password for root (enter for none): enter
+Set root password? [Y/n] n
+Remove anonymous users? [Y/n] n
+Disallow root login remotely? [Y/n] n
+Remove test database and access to it? [Y/n] n
+Reload privilege tables now? [Y/n] n
+"""
+    - name: Run mysql_secure_installation with expect
+      expect:
+        command: "mysql_secure_installation"
+        responses:
+          "Enter current password for root (enter for none):": "\n"
+          "Set root password? \[Y/n\]": "n\n"
+          "Remove anonymous users? \[Y/n\]": "n\n"
+          "Disallow root login remotely? \[Y/n\]": "n\n"
+          "Remove test database and access to it? \[Y/n\]": "n\n"
+          "Reload privilege tables now? \[Y/n\]": "n\n"
+
+
+
+sudo dnf -y install @httpd
+sudo dnf -y module install nodejs
+sudo rm -f /var/www/html/index.html
+sudo rm /etc/httpd/conf.d/welcome.conf
+sudo systemctl enable --now httpd
+
+
+
+
+
+sudo dnf module reset php -y
+sudo dnf module enable php:7.4 -y
+sudo dnf install php -y
+
+
+
+
+
+sudo adduser asterisk -m -c "Asterisk User"
+sudo chown asterisk. /var/run/asterisk
+sudo chown -R asterisk. /etc/asterisk
+sudo chown -R asterisk. /var/{lib,log,spool}/asterisk
+sudo chown -R asterisk. /usr/lib64/asterisk
+sudo chown -R asterisk. /var/www/
+
+ 
+
+sudo sed -i 's/^\(upload_max_filesize = \).*/\1120M/' /etc/php.ini
+sudo sed -i 's/^\(User\|Group\) .*/\1 asterisk/' /etc/httpd/conf/httpd.conf
+sudo sed -i 's/AllowOverride None/AllowOverride All/' /etc/httpd/conf/httpd.conf
+sudo sed -i 's/\(^memory_limit = \).*/\1128M/' /etc/php.ini
+sudo sed -i 's/^\(User\|Group\).*/\1 asterisk/' /etc/httpd/conf/httpd.conf
+sudo sed -i 's/AllowOverride None/AllowOverride All/' /etc/httpd/conf/httpd.conf
+sudo sed -i 's/\(^user = \).*/\1asterisk/' /etc/php-fpm.d/www.conf
+sudo sed -i 's/\(^group = \).*/\1asterisk/' /etc/php-fpm.d/www.conf
+sudo sed -i 's/\(^listen.acl_users = \).*/\1apache,nginx,asterisk/' /etc/php-fpm.d/www.conf
+
+
+sudo systemctl restart php-fpm httpd
+sudo systemctl enable php-fpm httpd
+
+
+
+sudo nano /etc/asterisk/sterisk.conf
+                '''
+                [directories](!)
+                astetcdir => /etc/asterisk
+                astmoddir => /usr/lib/asterisk/modules
+                astvarlibdir => /var/lib/asterisk
+                astdbdir => /var/lib/asterisk
+                astkeydir => /var/lib/asterisk
+                astdatadir => /var/lib/asterisk
+                astagidir => /var/lib/asterisk/agi-bin
+                astspooldir => /var/spool/asterisk
+                astrundir => /var/run/asterisk
+                astlogdir => /var/log/asterisk
+                astsbindir => /usr/sbin
+                '''
+
+
+cd /usr/src/
+sudo wget http://mirror.freepbx.org/modules/packages/freepbx/freepbx-14.0-latest.tgz
+sudo tar xfz freepbx-14.0-latest.tgz
+
+rm -f freepbx-14.0-latest.tgz
+cd freepbx
+
+sudo ./start_asterisk start
+sudo ./install -n
+
+
+# Install freepbx plugins:
+sudo fwconsole ma disablerepo commercial
+sudo fwconsole ma installall
+sudo fwconsole ma downloadinstall cxpanel
+sudo fwconsole ma downloadinstall backup
+sudo fwconsole ma delete firewall
+sudo fwconsole reload
+sudo fwconsole restart
+
+
+
+sudo systemctl restart httpd php-fpm
+
+# create freepbx systemd startup script
+
+sudo tee /etc/systemd/system/freepbx.service<<EOF
+[Unit]
+Description=FreePBX VoIP Server
+After=mariadb.service
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/fwconsole start -q
+ExecStop=/usr/sbin/fwconsole stop -q
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable freepbx
+sudo systemctl start freepbx
+
+
+sudo yum upgrade -y
+sudo fwconsole chown
+sudo fwconsole ma refreshsignatures
+sudo fwconsole ma upgradeall
+sudo fwconsole chown
+sudo fwconsole reload
+
+
+#### mongodb
+
+sudo nano /etc/yum.repos.d/mongodb-org-7.0.repo 
+
+[mongodb-org-7.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/8/mongodb-org/7.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://pgp.mongodb.com/server-7.0.asc
+
+sudo yum install -y mongodb-org
+
+
+
+
+sudo rm -rf mongod.lock
+sudo rm -rf /tmp/mongodb-27017.sock
+sudo chown -R mongod:mongod /var/lib/mongo
+sudo chown -R mongod:mongod /var/log/mongodb
+sudo service mongod start
+
+
+
+
+
+sudo mkdir /var/run/mongodb 
+sudo chown root:mongod /var/run/mongodb 
+sudo chmod g+w /var/run/mongodb
+
+
+
+
+
+
+
+####################
+wget https://www.getisymphony.com/files/builds/isymphony/iSymphonyV3-latest.noarch.rpm --no-check-certificate
+sudo rpm -Uhv  iSymphonyV3-latest.noarch.rpm
+sudo systemctl start iSymphonyServerV3
+sudo systemctl enable iSymphonyServerV3
+
+
+
+
+# sudo nano /var/www/html/admin/libraries/view.functions.php
+# sudo nano /etc/httpd/conf/httpd.conf
+# sudo nano /etc/php-fpm.d/www.conf
+
+
+
+
+
+
+
+
+
+
+
+
+###########################################################################
+sudo wget https://repo.mysql.com/mysql80-community-release-el8-1.noarch.rpm
+sudo yum install mysql80-community-release-el8-1.noarch.rpm
+sudo yum repolist enabled | grep "mysql.*-community.*"
+sudo yum module disable mysql
+sudo yum -y install mysql-community-server --nogpgcheck
+
+sudo service mysqld start
+sudo systemctl enable mysqld
+sudo systemctl status mysqld
+
+# sudo grep 'temporary password' /var/log/mysqld.log
+#sudo mysql_secure_installation
+ , No , y , No , y , y
+
+sudo yum list mysql-connector-odbc
+sudo yum install mysql-connector-odbc.x86_64 --nogpgcheck -y
+rpm -qa | grep mysql
+
+
+
+
+
+

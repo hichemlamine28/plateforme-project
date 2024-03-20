@@ -1,0 +1,5 @@
+[smtp-relay.brevo.com]:587      devops6080@gmail.com:<pass>
+[smtp.mailgun.com]:587          postmaster@sandboxccd5b1285bfd4bd78531fdf52097bfbd.mailgun.org:<key>
+[smtp.elasticemail.com]:2525    devops6080@gmail.com:<key>
+[smtp.elasticemail.com]:2525    hichemlamine@gmail.com:<key>
+[mail.spacemail.com]:587        hello@azurehacks.io:<key>

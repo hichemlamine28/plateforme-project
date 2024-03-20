@@ -1,0 +1,73 @@
+
+########## CURRENT USERS ################### 
+define service {
+    use                     generic-service
+    host_name               dhcp-server
+    service_description     CURRENT USERS
+    check_command           check_nrpe!check_users
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+
+define service {
+    use                     generic-service
+    host_name               dns-server
+    service_description     CURRENT USERS
+    check_command           check_nrpe!check_users
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+
+define service {
+    use                     generic-service
+    host_name               nas-server
+    service_description     CURRENT USERS
+    check_command           check_nrpe!check_users
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+
+define service {
+    use                     generic-service
+    host_name               ntp-server
+    service_description     CURRENT USERS
+    check_command           check_nrpe!check_users
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+
+define service {
+    use                     generic-service
+    host_name               snort-server
+    service_description     CURRENT USERS
+    check_command           check_nrpe!check_users
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+
+define service {
+    use                     generic-service
+    host_name               nagios-server
+    service_description     CURRENT USERS
+    check_command           check_nrpe!check_users
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}

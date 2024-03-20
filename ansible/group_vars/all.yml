@@ -1,0 +1,10 @@
+# only asterisk versions 13/14/15/16/17/18/19/20 supported for FREEPBX 16 (php7.4)
+# Version asterisk 21 supported by FREEPBX 17 (>=php 8.2)
+asterisk_version: 20.7.0
+# asterisk_version: 21.2.0 
+
+
+# freepbx_version: 14.0
+# freepbx_version: 15.0
+freepbx_version: 16.0
+

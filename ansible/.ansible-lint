@@ -1,0 +1,25 @@
+skip_list:
+  - fqcn-builtins
+  - fqcn[action]
+  - fqcn[action-core]
+  - fqcn[canonical]
+  - name[casing]
+  - name[play]
+  - name[missing]
+  - yaml[colons]
+  - yaml[new-line-at-end-of-file]
+  - yaml[indentation]
+  - yaml[trailing-spaces]
+  - yaml[line-length]
+  - yaml[empty-lines]
+  - yaml[commas]
+  - yaml[truthy]
+  - yaml[octal-values]
+  - risky-file-permissions
+  - risky-shell-pipe
+  - no-changed-when
+  - command-instead-of-shell
+  - jinja[spacing]
+  - package-latest
+  - args[module]
+  - load-failure

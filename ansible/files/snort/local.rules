@@ -1,0 +1,3 @@
+alert icmp any any -> $HOME_NET any (msg:"ICMP Packets Found"; sid:10001; rev:001;)
+alert tcp any any -> $HOME_NET any (msg:"TCP SYN flood attack Dtected"; sid:10002; rev:001;)
+alert udp any any -> $HOME_NET any (msg:"DOS tool UDP mode detected"; sid:10003; rev:001;)

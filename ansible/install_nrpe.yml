@@ -1,0 +1,6 @@
+---
+- name: Setup NRPE on all hosts
+  hosts: "dhcp:dns:nas:ntp:snort:nagios"
+  become: true
+  roles:
+    - nagios-nrpe

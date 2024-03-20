@@ -1,0 +1,68 @@
+---
+- name: install needed packages for nrpe
+  ansible.builtin.shell: |
+    sudo dnf install -y gcc glibc glibc-common openssl openssl-devel perl wget
+
+- name: Install NRPE and Nagios Plugins NRPE
+  yum:
+    name: ['nrpe', 'nagios-plugins-nrpe']
+    state: present
+ 
+- name: Install NRPE extra Plugins
+  yum:
+    name: ['nagios-plugins-all.x86_64', 'nagios-plugins-dhcp.x86_64', 'nagios-plugins-http.x86_64', 'nagios-plugins-log.x86_64', 'nagios-plugins-ntp.x86_64', 'nagios-plugins-ping.x86_64']
+    state: present
+
+- name: Copy check_memory.sh
+  copy:
+    src: check_memory.sh
+    dest: /usr/lib64/nagios/plugins/check_memory.sh
+    mode: "0755"
+- name: Set execute permission for check_memory.sh
+  file:
+    path: /usr/lib64/nagios/plugins/check_memory.sh
+    mode: "+x"
+- name: Copy check_mem.pl
+  copy:
+    src: check_mem.pl
+    dest: /usr/lib64/nagios/plugins/check_mem.pl
+    mode: "0755"
+- name: Set execute permission for check_mem.pl
+  file:
+    path: /usr/lib64/nagios/plugins/check_mem.pl
+    mode: "+x"
+
+- name: Replace allowed_hosts in nrpe.cfg
+  lineinfile:
+    path: /etc/nagios/nrpe.cfg
+    regexp: '^allowed_hosts='
+    line: 'allowed_hosts=127.0.0.1, 192.168.56.76'
+- name: Replace dont_blame_nrpe in nrpe.cfg
+  lineinfile:
+    path: /etc/nagios/nrpe.cfg
+    regexp: '^dont_blame_nrpe='
+    line: 'dont_blame_nrpe=1'
+
+- name: Add check_nrpe command to commands.cfg
+  blockinfile:
+    path: /etc/nagios/nrpe.cfg
+    marker: "# {mark} ANSIBLE MANAGED BLOCK -- DO NOT EDIT THIS SECTION MANUALLY" 
+    block: |
+      command[check_load]=/usr/lib64/nagios/plugins/check_load -r -w 8.0,7.5,7.0 -c 11.0,10.0,9.0
+      command[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w 300 -c 400
+      command[check_swap]=/usr/lib64/nagios/plugins/check_swap -w 10 -c 5
+      command[check_disk]=/usr/lib64/nagios/plugins/check_disk -w 15% -c 10% /
+      command[check_mem]=/usr/lib64/nagios/plugins/check_mem.pl -f -w 20 -c 10
+      command[check_memory]=/usr/lib64/nagios/plugins/check_memory.sh -w 20 -c 10
+
+- name: Allow 5666 tcp port for nagios
+  ansible.builtin.shell: |
+    sudo sh -c "echo >> /etc/services"
+    sudo sh -c "sudo echo '# Nagios services' >> /etc/services"
+    sudo sh -c "sudo echo 'nrpe    5666/tcp' >> /etc/services"
+
+- name: Restart nrpe service
+  service:
+    name: nrpe
+    state: restarted
+    enabled: true

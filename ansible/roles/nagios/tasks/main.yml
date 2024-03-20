@@ -1,0 +1,174 @@
+---
+- name: Install needed packages for nagios
+  ansible.builtin.shell: |
+    sudo yum install perl -y
+    sudo yum --enablerepo=epel-testing install nagios-plugins-disk_smb -y
+    # sudo yum --enablerepo=epel-testing install nagios-plugins-all
+
+- name: Download nagios package
+  get_url:
+    url: "https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.4.6.tar.gz"
+    dest: "/tmp/"
+
+- name: Download nagios-plugins package
+  get_url:
+    url: "https://nagios-plugins.org/download/nagios-plugins-2.3.3.tar.gz"
+    dest: "/tmp/"    
+
+- name: Install and configure nagios
+  ansible.builtin.shell: |
+    sudo yum -y install httpd httpd-tools php gcc glibc glibc-common wget perl gd gd-devel unzip zip tar
+    sudo useradd nagios
+    sudo groupadd nagcmd
+    sudo usermod -a -G nagcmd nagios
+    sudo usermod -a -G nagcmd apache
+    sudo mkdir /etc/httpd/conf.d
+    sudo touch /etc/httpd/conf.d/nagios.cfg
+    cd /tmp/
+    tar -zxvf nagios-4.4.6.tar.gz
+    cd /tmp/nagios-4.4.6/
+    ./configure --with-nagios-group=nagios --with-command-group=nagcmd
+    make all
+    sudo make install
+    sudo make install-init
+    sudo make install-config
+    sudo make install-commandmode
+    sudo make install-webconf
+
+
+- name: Générer le fichier htpasswd localement
+  ansible.builtin.htpasswd:
+    path: "/tmp/htpasswd.users"
+    name: "nagiosadmin"
+    password: "{{ mot_de_passe_nagios }}"
+    mode: "0644"
+  delegate_to: localhost
+
+- name: Copier le fichier htpasswd sur le serveur
+  become: true
+  ansible.builtin.copy:
+    src: "/tmp/htpasswd.users"
+    dest: "/usr/local/nagios/etc/htpasswd.users"
+    owner: "nagios"
+    group: "nagios"
+    mode: "0644"
+
+ # htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+
+- name: Restart httpd service
+  service:
+    name: httpd
+    state: restarted
+    enabled: true
+
+
+- name: Install and configure nagios-plugins
+  ansible.builtin.shell: |
+    cd /tmp
+    tar -zxvf nagios-plugins-2.3.3.tar.gz
+    cd /tmp/nagios-plugins-2.3.3/
+    ./configure --with-nagios-user=nagios --with-nagios-group=nagios
+    make
+    sudo make install
+    sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+- name: Configure mail adress in contacts.cfg file
+  become: true
+  ansible.builtin.replace:
+    path: /usr/local/nagios/etc/objects/contacts.cfg
+    regexp: '    email\s+.*;.*$'
+    replace: '    email                   hichemlamine@gmail.com ;'
+
+- name: Configure Nagios hosts in hosts.cfg file
+  template:
+    src: hosts.cfg.j2
+    dest: /usr/local/nagios/etc/objects/hosts.cfg
+
+- name: Ajouter la ligne cfg_file du fichier hosts.cfg dans la config nagios.cfg
+  ansible.builtin.lineinfile:
+    path: /usr/local/nagios/etc/nagios.cfg
+    insertafter: "^cfg_file=/usr/local/nagios/etc/objects/templates.cfg$"
+    line: "cfg_file=/usr/local/nagios/etc/objects/hosts.cfg"
+
+
+- name: Add check_nrpe command to commands.cfg
+  blockinfile:
+    path: /usr/local/nagios/etc/objects/commands.cfg
+    marker: "# {mark} ANSIBLE MANAGED BLOCK -- DO NOT EDIT THIS SECTION MANUALLY"
+    block: |
+      define command {
+          command_name    check_nrpe
+          command_line    $USER1$/check_nrpe -H $HOSTADDRESS$ -t 30 -c $ARG1$ $ARG2$
+      }
+
+- name: Install mod_ssl
+  ansible.builtin.shell:
+    sudo yum install mod_ssl -y
+
+- name: generate key and crt self signed certificates
+  shell:
+    cmd: "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/nagios.key -out /etc/pki/tls/certs/nagios.crt -subj '/C=FR/ST=France/L=Paris/O=greta/OU=fadhel/CN={{domain}}'"
+
+- name: Change permissions for Nagios SSL certificate
+  become: true
+  file:
+    path: /etc/pki/tls/certs/nagios.crt
+    mode: "0600"
+
+
+- name: Change permissions for Nagios SSL key
+  become: true
+  file:
+    path: /etc/pki/tls/private/nagios.key
+    mode: "0600"
+
+
+- name: Replace SSLCertificateFile directive
+  replace:
+    path: /etc/httpd/conf.d/ssl.conf
+    regexp: '^SSLCertificateFile /etc/pki/tls/certs/localhost.crt'
+    replace: 'SSLCertificateFile /etc/pki/tls/certs/nagios.crt'
+
+
+- name: Replace SSLCertificateKeyFile directive
+  replace:
+    path: /etc/httpd/conf.d/ssl.conf
+    regexp: '^SSLCertificateKeyFile /etc/pki/tls/private/localhost.key'
+    replace: 'SSLCertificateKeyFile /etc/pki/tls/private/nagios.key'
+
+
+- name: Add Rewrite rules at the end of httpd.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    line: |
+      RewriteEngine On
+      RewriteCond %{HTTPS} off
+      RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+    insertafter: EOF  # Insérer à la fin du fichier
+    state: present  # Assurer que les lignes sont présentes
+
+
+- name: allow httpd network connect
+  ansible.builtin.shell: |
+    sudo setsebool -P httpd_can_network_connect  1
+
+- name: Restart Apache
+  service:
+    name: httpd
+    state: restarted
+
+- name: Install nrpe-server on nagios server
+  import_tasks: nrpe-server.yml
+
+- name: Install and Configure Postfix
+  import_tasks: postfix.yml
+
+- name: Reload systemd daemon
+  become: true  # Assurez-vous d'avoir les droits d'administration pour exécuter la commande
+  command: systemctl daemon-reload
+
+- name: Restart nagios service
+  service:
+    name: nagios
+    state: restarted
+    enabled: true

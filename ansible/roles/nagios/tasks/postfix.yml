@@ -1,0 +1,38 @@
+---
+- name: install postfix
+  ansible.builtin.shell: |
+    sudo yum install postfix -y
+
+- name: Copier le fichier de configuration Postfix
+  ansible.builtin.template:
+    src: templates/postfix/main.cf.j2 
+    dest: /etc/postfix/main.cf
+  become: true
+
+- name: Genrate certificates
+  ansible.builtin.shell: |
+    cd /tmp/
+    sudo openssl s_client -showcerts -connect smtp.gmail.com:587 -starttls smtp -tls1_2 </dev/null | openssl x509 -outform PEM > smtp_tls_cert.pem
+    sudo cp smtp_tls_cert.pem /etc/postfix
+
+
+- name: Copier le fichier de configuration Postfix
+  ansible.builtin.template:
+    src: templates/postfix/sasl_passwd.j2 
+    dest: /etc/postfix/sasl_passwd
+  become: true
+
+
+- name: Postmap sasl_passwd install mailx and enable postfix
+  ansible.builtin.shell: |
+    sudo postmap /etc/postfix/sasl_passwd
+    sudo chmod 600 /etc/postfix/sasl/sasl_passwd
+    sudo yum install -y mailx
+    sudo yum install cyrus-sasl cyrus-sasl-plain -y
+    sudo systemctl restart postfix
+    sudo systemctl enable postfix
+
+
+
+
+

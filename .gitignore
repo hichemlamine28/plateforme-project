@@ -1,0 +1,4 @@
+server/.vagrant
+server/*.log
+ansible/templates/postfix/sasl_passwd.j2
+ZZ_Data/postfix.j2

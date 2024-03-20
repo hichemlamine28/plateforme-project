@@ -1,0 +1,47 @@
+---
+- name: Configure NTP server
+  hosts: ntp
+  become: true
+  tasks:
+    - name: Install Chrony package
+      package:
+        name: chrony
+        state: present
+
+    - name: Create /etc/chrony directory
+      file:
+        path: /etc/chrony
+        state: directory
+
+    - name: Configure Chrony servers
+      template:
+        src: templates/ntp/chrony.conf.j2
+        dest: /etc/chrony/chrony.conf
+      notify: restart chronyd
+
+  
+    - name: Check dhcp status
+      block:
+        - name: Check if chronyd service is running
+          systemd:
+            name: chronyd
+            state: started
+          register: chronyd_status
+
+        - name: Restart chronyd service if it's not running
+          service:
+            name: chronyd
+            state: restarted
+          when: chronyd_status.failed
+      rescue:
+        - name: Retry restarting chronyd service
+          service:
+            name: chronyd
+            state: restarted
+
+  handlers:
+    - name: restart chronyd
+      service:
+        name: chronyd
+        state: restarted
+        enabled: true

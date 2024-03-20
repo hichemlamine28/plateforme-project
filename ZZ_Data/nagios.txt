@@ -1,0 +1,224 @@
+sudo yum -y install httpd httpd-tools php gcc glibc glibc-common wget perl gd gd-devel unzip zip tar
+sudo useradd nagios
+sudo groupadd nagcmd
+sudo usermod -a -G nagcmd nagios
+sudo usermod -a -G nagcmd apache
+sudo mkdir /etc/httpd/conf.d
+sudo touch /etc/httpd/conf.d/nagios.cfg
+cd /tmp/
+wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.5.1.tar.gz
+tar -zxvf nagios-4.4.6.tar.gz
+cd /tmp/nagios-4.5.1/
+./configure --with-nagios-group=nagios --with-command-group=nagcmd
+make all
+sudo make install
+sudo make install-init
+sudo make install-config
+sudo make install-commandmode
+sudo make install-webconf
+htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+sudo systemctl restart httpd
+sudo systemctl enable httpd
+nano /usr/local/nagios/etc/objects/contacts.cfg
+                            CHANGE EMAIL ADDRESS. IT IS OPTIONAL
+cd /tmp
+wget https://nagios-plugins.org/download/nagios-plugins-2.3.3.tar.gz
+tar -zxvf nagios-plugins-2.3.3.tar.gz
+cd /tmp/nagios-plugins-2.3.3/
+./configure --with-nagios-user=nagios --with-nagios-group=nagios
+make
+sudo make install
+sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+sudo systemctl start nagios
+sudo systemctl enable nagios
+sudo systemctl status nagios
+sudo setsebool -P httpd_can_network_connect  1
+
+# sudo getenforce
+# sudo setenforce 0   
+# sudo firewall-cmd --permanent --add-service=http
+# sudo firewall-cmd --reload
+
+http://192.168.56.76/nagios/
+
+
+
+
+
+sudo yum install nrpe nagios-plugins-nrpe -y 
+
+edit nrpe: sudo nano /etc/nagios/nrpe.cfg (add allowed, commands ...)
+command[check_root_disk]=/usr/lib64/nagios/plugins/check_disk -w 20% -c 10% -p /
+
+cd /usr/lib64/nagios/plugins/
+wget https://raw.githubusercontent.com/justintime/nagios-plugins/master/check_mem/check_mem.pl
+chmod +x check_mem.pl
+
+
+copy check_memory.sh  check_mem.pl vers plugins /usr/lib64/nagios/plugins/
+
+
+add this commands to: /etc/nagios/nrpe.cfg
+command[check_load]=/usr/lib64/nagios/plugins/check_load -r -w 8.0,7.5,7.0 -c 11.0,10.0,9.0
+command[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w 300 -c 400
+command[check_swap]=/usr/lib64/nagios/plugins/check_swap -w 10 -c 5
+command[check_disk]=/usr/lib64/nagios/plugins/check_disk -w 15% -c 10% /
+command[check_mem]=/usr/lib64/nagios/plugins/check_mem.pl -f -w 20 -c 10
+command[check_memory]=/usr/lib64/nagios/plugins/check_memory.sh -w 30 -c 20
+
+
+
+/usr/lib64/nagios/plugins/check_nrpe -H
+/usr/lib64/nagios/plugins/check_disk -H
+
+############################""
+
+
+$ sudo dnf install -y gcc glibc glibc-common openssl openssl-devel perl wget
+
+
+$ cd /tmp/
+
+$ sudo wget https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-4.0.3/nrpe-4.0.3.tar.gz
+
+
+
+sudo tar zxf nrpe-*.tar.gz
+cd nrpe-4.0.3
+sudo ./configure --enable-command-args
+sudo make all
+sudo make install-groups-users
+sudo make install
+sudo make install-config
+sudo sh -c "echo >> /etc/services"
+sudo sh -c "sudo echo '# Nagios services' >> /etc/services"
+sudo sh -c "sudo echo 'nrpe    5666/tcp' >> /etc/services"
+sudo make install-init
+sudo systemctl enable nrpe
+
+
+
+replace this
+sudo nano /usr/local/nagios/etc/nrpe.cfg
+
+allowed_hosts=127.0.0.1, ::1        par     allowed_hosts=127.0.0.1, 192.168.56.76
+dont_blame_nrpe=0                   par     dont_blame_nrpe=0 
+
+
+
+sudo systemctl start nrpe
+
+
+cd /usr/lib/nagios/plugins/
+wget https://raw.githubusercontent.com/justintime/nagios-plugins/master/check_mem/check_mem.pl
+chmod +x check_mem.pl
+
+
+
+
+
+##########################""
+
+
+
+
+sur nagios_server:
+
+sudo nano /usr/local/nagios/etc/objects/commands.cfg
+
+Ajouter ceci  
+
+
+define command {
+    command_name       check_nrpe
+    command_line       $USER1$/check_nrpe -H $HOSTADDRESS$ -t 30 -c $ARG1$ $ARG2$
+}
+
+juste apres 
+
+define command {
+
+    command_name    notify-service-by-email
+    command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SE$
+}
+
+
+
+
+
+
+
+################
+
+sur nagios client
+
+
+sudo nano /usr/local/nagios/etc/nrpe.cfg
+Ajouter ceci:
+
+command[check_disk]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /
+
+juste apres :
+
+command[check_total_procs]=/usr/local/nagios/libexec/check_procs -w 150 -c 200
+
+
+sudo syystemctl restart nrpe
+command[check_mem]=/usr/lib64/nagios/plugins/check_mem -f -w 20 -c 10
+
+##################################
+sudo syystemctl restart nagios
+
+
+
+
+
+
+
+
+
+
+
+
+############  SSL TLS   NAgios HTTPD ######
+
+
+sudo yum install mod_ssl -y
+
+cp certfile.crt /etc/pki/tls/certs/
+cp keyfile.key /etc/pki/tls/private/
+chmod go-rwx /etc/pki/tls/certs/nagios.crt
+chmod go-rwx /etc/pki/tls/private/nagios.key
+
+dans le fichier /etc/httpd/conf.d/ssl.conf: repalce
+SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+
+par :
+SSLCertificateFile /etc/pki/tls/certs/nagios.crt
+
+
+SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+
+par :
+SSLCertificateFile /etc/pki/tls/certs/nagios.crt
+
+
+
+puis 
+
+
+SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+
+par :
+
+SSLCertificateKeyFile /etc/pki/tls/private/nagios.key
+
+
+
+
+Add this to : /etc/httpd/conf/httpd.conf
+
+
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}

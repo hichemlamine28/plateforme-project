@@ -1,0 +1,33 @@
+---
+- name: Install Nginx
+  package:
+    name: nginx
+    state: present
+
+- name: Install Nginx
+  package:
+    name: nginx
+    state: present
+    
+- name: Create /etc/nginx/certs/
+  file:
+    path: /etc/nginx/certs/
+    state: directory
+
+- name: generate key and crt self signed certificates
+  shell:
+    cmd: "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/nagios.key -out /etc/pki/tls/certs/nagios.crt -subj '/C=FR/ST=France/L=Paris/O=greta/OU=fadhel/CN={{domain}}'"
+
+# - name: Copy SSL certificate and key
+#   copy:
+#     src: /etc/nginx/ssl/{{ domain }}.crt
+#     dest: /etc/nginx/ssl/{{ domain }}.crt
+
+
+- name: Configure Nginx for Nagios
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/nginx.conf
+  notify: Restart Nginx
+
+

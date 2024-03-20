@@ -1,0 +1,65 @@
+#sudo yum update -y
+#sudo dnf install epel-release -y
+#sudo dnf install https://www.snort.org/downloads/snort-2.9.20-1.centos.x86-64.rpm -y
+sudo dnf install https://www.snort.org/downloads/snort/snort-2.9.20-1.f35.x86_64.rpm -y
+
+sudo dnf --enablerepo=powertools install libnetfilter_queue-devel -y
+sudo dnf install gcc gcc-c++ git flex bison zlib zlib-devel pcre pcre-devel libdnet tcpdump libnghttp2 wget xz-devel -y
+
+sudo ethtool -K eth1 gro off
+sudo ethtool -K eth1 lro off
+sudo sudo ifdown eth1 && sudo ifup eth1
+
+sudo mkdir ~/snort
+cd ~/snort/
+
+sudo wget https://www.tcpdump.org/release/libpcap-1.8.1.tar.gz
+sudo tar -xzvf libpcap-1.8.1.tar.gz
+#cd ~/snort/
+#ls
+cd libcap-1.8.1
+sudo ./configure
+sudo make
+sudo make install
+sudo ldconfig
+sudo ln -s /usr/lib64/libdnet.so.1 /usr/lib64/libdnet.1
+
+# just for verification (snort -v)
+
+sudo touch /usr/local/lib/snort_dynamicrules
+
+cd /etc/snort/rules
+
+sudo touch white_list.rules
+sudo touch black_list.rules
+sudo touch local.rules
+
+sudo nano local.rules
+        '''
+        alert icmp any any -> $HOME_NET any (msg:"ICMP Packets Found"; sid:10001; rev:001;)
+        alert tcp any any -> $HOME_NET any (msg:"TCP SYN flood attack Dtected"; sid:10002; rev:001;)
+        alert udp any any -> $HOME_NET any (msg:"DOS tool UDP mode detected"; sid:10003; rev:001;)
+        '''
+
+sudo systemctl daemon-reload
+sudo systemctl restart snortd
+sudo systemctl enable snortd
+sudo systemctl status snortd
+
+
+
+Test Config snort:
+sudo snort -T -c /etc/snort/snort.conf 
+
+Console snort :
+sudo snort -A console -q -c /etc/snort/snort.conf
+
+for logs use this command:
+                sudo snort -r /var/log/snort/snort.log.1710601354
+
+(lancer le commande en lançant depuis une autre vm un par un )
+
+Other VMs:
+ping 192.168.56.75 
+nmap -v -A 192.168.56.75
+

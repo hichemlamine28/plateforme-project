@@ -1,0 +1,48 @@
+---
+- name: Configure DHCP server
+  hosts: dhcp
+  become: true
+  tasks:
+    - name: Install DHCP server package
+      package:
+        name: dhcp-server
+        state: present
+
+    - name: Add subnet declaration for eth1 to dhcpd.conf
+      ansible.builtin.lineinfile:
+        path: /etc/dhcp/dhcpd.conf
+        insertafter: EOF
+        line: |
+          subnet 192.168.56.0 netmask 255.255.255.0 {
+              range 192.168.56.100 192.168.56.200;
+              option routers 192.168.56.1;
+              option domain-name-servers 8.8.8.8, 8.8.4.4;
+          }
+      notify: restart dhcpd
+
+
+    - name: Check dhcp status
+      block:
+        - name: Check if dhcpd service is running
+          systemd:
+            name: dhcpd
+            state: started
+          register: dhcpd_status
+
+        - name: Restart dhcpd service if it's not running
+          service:
+            name: dhcpd
+            state: restarted
+          when: dhcpd_status.failed
+      rescue:
+        - name: Retry restarting dhcpd service
+          service:
+            name: dhcpd
+            state: restarted
+
+  handlers:
+    - name: restart dhcpd
+      service:
+        name: dhcpd
+        state: restarted
+        enabled: true

@@ -1,0 +1,23 @@
+#!/usr/bin/expect
+
+spawn mysql_secure_installation
+
+expect "Enter current password for root (enter for none):"
+send "\r"
+
+expect "Set root password? \[Y/n\]"
+send "n\r"
+
+expect "Remove anonymous users? \[Y/n\]"
+send "n\r"
+
+expect "Disallow root login remotely? \[Y/n\]"
+send "n\r"
+
+expect "Remove test database and access to it? \[Y/n\]"
+send "n\r"
+
+expect "Reload privilege tables now? \[Y/n\]"
+send "n\r"
+
+expect eof

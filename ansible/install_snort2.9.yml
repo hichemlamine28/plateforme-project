@@ -1,0 +1,86 @@
+---
+- name: Install Snort with web interface on snort server
+  hosts: snort
+  become: yes
+  tasks:
+    - name: Install snort from official website
+      ansible.builtin.shell: |
+        sudo dnf install https://www.snort.org/downloads/snort/snort-2.9.20-1.f35.x86_64.rpm -y
+        sudo dnf --enablerepo=powertools install libnetfilter_queue-devel -y
+
+# sudo dnf install gcc gcc-c++ git flex bison zlib zlib-devel pcre pcre-devel libdnet tcpdump libnghttp2 wget xz-devel -y
+    - name: Install required packages
+      dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - gcc
+        - gcc-c++
+        - git
+        - flex
+        - bison
+        - zlib
+        - zlib-devel
+        - pcre
+        - pcre-devel
+        - libdnet
+        - tcpdump
+        - libnghttp2
+        - xz-devel
+        - wget
+
+    - name: Send ethtool commands
+      ansible.builtin.shell: |
+        sudo ethtool -K eth1 gro off
+        sudo ethtool -K eth1 lro off
+        sudo sudo ifdown eth1 && sudo ifup eth1
+
+    - name: Create ~/snort folder if not exist
+      file:
+        path: "~/snort"
+        state: directory
+
+    - name: Download Libpcap
+      get_url:
+        url: "https://www.tcpdump.org/release/libpcap-1.8.1.tar.gz"
+        dest: ~/snort
+
+    - name: Configure libpcap for snort
+      ansible.builtin.shell: |
+        cd ~/snort/
+        sudo tar -xzvf libpcap-1.8.1.tar.gz
+        cd libpcap-1.8.1
+        sudo ./configure
+        sudo make
+        sudo make install
+        sudo ldconfig
+        sudo ln -s /usr/lib64/libdnet.so.1 /usr/lib64/libdnet.1
+        sudo touch /usr/local/lib/snort_dynamicrules
+
+    - name: Send local.rules file
+      ansible.builtin.copy:
+        src: files/snort/local.rules
+        dest: /etc/snort/rules/
+
+    - name: Send white_list.rules file
+      ansible.builtin.copy:
+        src: files/snort/white_list.rules
+        dest: /etc/snort/rules/
+
+    - name: Send black_list.rules file
+      ansible.builtin.copy:
+        src: files/snort/black_list.rules
+        dest: /etc/snort/rules/
+
+    - name: Send snort config file
+      ansible.builtin.copy:
+        src: files/snort/snort.conf
+        dest: /etc/snort/
+
+    - name: restart snort
+      service:
+        name: snortd
+        state: restarted
+        enabled: true
+
+

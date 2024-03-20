@@ -1,0 +1,50 @@
+---
+- name: Install NAS
+  hosts: nas
+  become: true
+  tasks:
+    - name: Update package cache
+      package:
+        name: '*'
+        state: latest
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nfs-utils
+        - samba
+        - samba-client
+        - cifs-utils
+      when: ansible_os_family == 'RedHat'
+
+    - name: Configure NFS exports
+      lineinfile:
+        path: /etc/exports
+        line: "/nfs_share *(rw,sync,no_root_squash)"
+        state: present
+      notify: Restart NFS
+
+    - name: Configure Samba shares
+      lineinfile:
+        path: /etc/samba/smb.conf
+        line: |
+          [samba_share]
+              path = /samba_share
+              read only = no
+              guest ok = yes
+        state: present
+      notify: Restart Samba
+
+  handlers:
+    - name: Restart NFS
+      service:
+        name: nfs-server
+        state: restarted
+
+    - name: Restart Samba
+      service:
+        name: smb
+        state: restarted

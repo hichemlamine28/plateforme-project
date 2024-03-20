@@ -1,0 +1,53 @@
+---
+- name: Setup Cockpit and Webmin on all hosts
+  hosts: all
+  # hosts: "dhcp:dns:nas:ntp:snort:nagios"
+  become: true
+  tasks:
+  - name: Install Cockpit package
+    package:
+      name: cockpit
+      state: present
+
+  - name: Start and enable Cockpit service
+    service:
+      name: cockpit
+      state: started
+      enabled: true
+
+  - name: Create a symbolic link for Cockpit service
+    file:
+      src: /usr/lib/systemd/system/cockpit.service
+      dest: /etc/systemd/system/multi-user.target.wants/cockpit.service
+      state: link
+      force: yes
+
+  - name: Add Webmin repository
+    become: yes
+    copy:
+      dest: /etc/yum.repos.d/webmin.repo
+      content: |
+        [Webmin]
+        name=Webmin Distribution Neutral
+        # baseurl=http://download.webmin.com/download/yum
+        baseurl=https://download.webmin.com/download/newkey/yum
+        enabled=1
+        gpgcheck=1
+        gpgkey=https://download.webmin.com/jcameron-key.asc
+
+  # - name: Install Webmin
+  #   become: yes
+  #   package:
+  #     name: webmin
+  #     state: present
+  #     update_cache: yes
+
+  - name: Install Webmin without GPG check (not recommended for production)
+    ansible.builtin.shell: dnf install -y --nogpgcheck webmin
+
+
+  - name: restart and enable webmin
+    service:
+      name: webmin
+      state: restarted
+      enabled: true

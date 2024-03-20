@@ -1,0 +1,48 @@
+#########################################################################
+Python3.8
+#########################################################################
+
+# installer venv:   sudo apt-get install python3.8-venv         ou      sudo yum -y install python3-virtualenv
+python3.8 -m venv venv
+source venv/bin/activate
+pip --version
+
+pip install --upgrade wheel
+pip install --upgrade pip
+pip install --upgrade setuptools
+python3 -m pip install -r requirements.txt
+ansible-galaxy collection install -f -r galaxy_collection.txt
+
+
+
+#########################################################################
+Python3.9
+#########################################################################
+
+# installer venv:   sudo apt-get install python3.9-venv
+python3.9 -m venv venv
+source venv/bin/activate
+pip --version
+
+pip install --upgrade wheel
+pip install --upgrade pip
+pip install --upgrade setuptools
+python3 -m pip install -r requirements.txt
+ansible-galaxy collection install -f -r galaxy_collection.txt
+
+
+
+#########################################################################
+Python3.10
+#########################################################################
+
+# installer venv:   sudo apt-get install python3.10-venv
+python3.10 -m venv venv
+source venv/bin/activate
+pip --version
+
+pip install --upgrade wheel
+pip install --upgrade pip
+pip install --upgrade setuptools
+python3 -m pip install -r requirements.txt
+ansible-galaxy collection install -f -r galaxy_collection.txt

@@ -1,0 +1,332 @@
+---
+- name: Install Asterisk on CentOS 8
+  hosts: asterisk
+  become: true
+  tasks:
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - tar
+        - wget
+    - name: Disable Selinux and install needed Packages
+      ansible.builtin.shell: | 
+        sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+        sudo setenforce 0
+        sudo yum -y install epel-release gcc-c++ ncurses-devel libxml2-devel wget openssl-devel newt-devel kernel-devel sqlite-devel libuuid-devel gtk2-devel jansson-devel binutils-devel bzip2 patch libedit libedit-devel tftp-server ncurses-devel sendmail sendmail-cf sox newt-devel libxml2-devel libtiff-devel audiofile-devel gtk2-devel subversion kernel-devel git crontabs cronie cronie-anacron wget vim nano uuid-devel sqlite-devel net-tools
+
+    - name: Clean /tmp folder
+      ansible.builtin.shell: | 
+        sudo rm -rf /tmp/*
+
+    - name: Download and install pjproject Package
+      ansible.builtin.shell: | 
+        cd /tmp
+        wget https://github.com/pjsip/pjproject/archive/refs/tags/2.14.1.tar.gz
+        tar -xzvf 2.14.1.tar.gz
+        cd pjproject-2.14.1
+        ./configure CFLAGS="-DNDEBUG -DPJ_HAS_IPV6=1" --prefix=/usr --libdir=/usr/lib64 --enable-shared --disable-video --disable-sound --disable-opencore-amr
+        make dep
+        make
+        sudo make install
+        sudo ldconfig
+
+    - name: Download Asterisk source tarball
+      get_url:
+        # url: "http://downloads.asterisk.org/pub/telephony/asterisk/old-releases/asterisk-{{ asterisk_version }}.tar.gz"
+        # url: "http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-{{ asterisk_version }}.tar.gz"
+        url: "http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-{{ asterisk_version }}.tar.gz"
+        dest: /tmp/
+
+    - name: Extract /tmp/asterisk-{{asterisk_version}}.tar.gz
+      unarchive:
+        src: "/tmp/asterisk-{{asterisk_version}}.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Install svn and mp3_source
+      ansible.builtin.shell: |
+        cd /tmp/asterisk-{{asterisk_version}}
+        sudo yum install svn
+        contrib/scripts/get_mp3_source.sh
+
+    - name: Installation of needed tools
+      ansible.builtin.shell: |
+        cd /tmp/asterisk-{{asterisk_version}}
+        sudo ./contrib/scripts/install_prereq install
+
+    - name: Configure before installation of asterisk and tools
+      ansible.builtin.shell: |
+        cd /tmp/asterisk-{{asterisk_version}}
+        ./configure --libdir=/usr/lib64 --with-jansson-bundled
+
+    - name: Make 
+      ansible.builtin.shell: |
+        cd /tmp/asterisk-{{asterisk_version}}
+        make
+
+    - name: Make install
+      ansible.builtin.shell: |      
+        cd /tmp/asterisk-{{asterisk_version}}
+        sudo make install
+
+    - name: Make Samples
+      ansible.builtin.shell: |
+        cd /tmp/asterisk-{{asterisk_version}}
+        sudo make samples
+      
+    - name: Make basic-pbx
+      ansible.builtin.shell: |
+        cd /tmp/asterisk-{{asterisk_version}}
+        sudo make basic-pbx
+
+    - name: Make config
+      ansible.builtin.shell: |
+        cd /tmp/asterisk-{{asterisk_version}}
+        sudo make config
+
+#############################################################################
+#############################################################################
+
+- name: Install and configure FreePBX with Asterisk on CentOS 8
+  hosts: asterisk
+  become: yes
+  tasks:
+    - name: Clean /tmp folder
+      ansible.builtin.shell: | 
+        sudo rm -rf /tmp/*
+
+    - name: Install packages Pear console_Getopt and java jdk
+      ansible.builtin.shell: |
+        sudo yum install -y php php-mysqlnd php-mbstring php-process php-gd php-json php-xml php-devel php-opcache php-devel php-intl php-mbstring php-pear php-process mariadb-server mariadb httpd gnutls-devel unixODBC
+        #sudo pear install Console_Getopt
+        sudo pear upgrade Console_Getopt
+        sudo yum install java-1.8.0-openjdk.x86_64 -y
+
+    - name: restart mariadb
+      systemd:
+        name: mariadb
+        state: restarted
+        enabled: true
+
+    - name: Install expect package
+      package:
+        name: expect
+        state: present
+      become: yes
+
+    - name: Transfer expect script to server
+      copy:
+        src: files/asterisk/mysql_secure_install.expect
+        dest: /tmp/mysql_secure_install.expect
+        mode: "0755"
+
+    - name: Execute expect script
+      command: "/tmp/mysql_secure_install.expect"
+
+################## install mongodb ###############
+    - name: Create MongoDB repository file
+      copy:
+        dest: /etc/yum.repos.d/mongodb.repo
+        content: |
+          [mongodb-org-4.4]
+          name=MongoDB Repository
+          baseurl=https://repo.mongodb.org/yum/redhat/8Server/mongodb-org/4.4/x86_64/
+          gpgcheck=1
+          enabled=1
+          gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+
+    - name: Install mongodb and checkpolicy
+      ansible.builtin.shell: | 
+        sudo dnf install -y mongodb-org
+        sudo dnf install -y checkpolicy
+
+    - name: Post config mongodb
+      ansible.builtin.shell: | 
+        cat > mongodb_cgroup_memory.te <<EOF
+        module mongodb_cgroup_memory 1.0;
+
+        require {
+            type cgroup_t;
+            type mongod_t;
+            class dir search;
+            class file { getattr open read };
+        }
+
+        #============= mongod_t ==============
+        allow mongod_t cgroup_t:dir search;
+        allow mongod_t cgroup_t:file { getattr open read };
+        EOF
+
+    - name: Configure cgroup mongo
+      ansible.builtin.shell: | 
+        checkmodule -M -m -o mongodb_cgroup_memory.mod mongodb_cgroup_memory.te
+        semodule_package -o mongodb_cgroup_memory.pp -m mongodb_cgroup_memory.mod
+        sudo semodule -i mongodb_cgroup_memory.pp
+
+    - name: Add security configuration block to mong.conf
+      blockinfile:
+        path: /etc/mongod.conf
+        block: |
+          security:
+            authorization: enabled
+
+    - name: Create tuned profile directory
+      file:
+        path: /etc/tuned/virtual-guest-no-thp
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create tuned.conf file and add configuration
+      copy:
+        dest: /etc/tuned/virtual-guest-no-thp/tuned.conf
+        content: |
+          [main]
+          include=virtual-guest
+
+          [vm]
+          transparent_hugepages=never
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Tune profile virtual-guest
+      ansible.builtin.shell: | 
+        sudo tuned-adm profile virtual-guest-no-thp
+
+    - name: restart mongodb
+      systemd:
+        name: mongod
+        state: restarted
+        enabled: true
+############## Fin Mongodb ############################
+
+    - name: Install @httpd and nodejs
+      ansible.builtin.shell: |
+        sudo dnf -y install @httpd
+        sudo dnf -y module install nodejs
+        sudo rm -f /var/www/html/index.html
+        sudo rm /etc/httpd/conf.d/welcome.conf
+        sudo systemctl enable --now httpd
+
+    - name: Install php7.4
+      ansible.builtin.shell: |
+        sudo dnf module reset php -y
+        sudo dnf module enable php:7.4 -y
+        sudo dnf install php -y
+
+    - name: Enable and start php-fpm and httpd
+      ansible.builtin.shell: |
+        sudo systemctl restart php-fpm httpd
+        sudo systemctl enable php-fpm httpd
+
+    - name: Add users and fix owners
+      ansible.builtin.shell: |
+        sudo adduser asterisk -m -c "Asterisk User"
+        sudo chown asterisk. /var/run/asterisk
+        sudo chown -R asterisk. /etc/asterisk
+        sudo chown -R asterisk. /var/{lib,log,spool}/asterisk
+        sudo chown -R asterisk. /usr/lib64/asterisk
+        sudo chown -R asterisk. /var/www/
+
+    - name: Fix php-fpm and httpd
+      ansible.builtin.shell: |
+        sudo sed -i 's/^\(upload_max_filesize = \).*/\1120M/' /etc/php.ini
+        sudo sed -i 's/^\(User\|Group\) .*/\1 asterisk/' /etc/httpd/conf/httpd.conf
+        sudo sed -i 's/AllowOverride None/AllowOverride All/' /etc/httpd/conf/httpd.conf
+        sudo sed -i 's/\(^memory_limit = \).*/\1128M/' /etc/php.ini
+        sudo sed -i 's/^\(User\|Group\).*/\1 asterisk/' /etc/httpd/conf/httpd.conf
+        sudo sed -i 's/AllowOverride None/AllowOverride All/' /etc/httpd/conf/httpd.conf
+        sudo sed -i 's/\(^user = \).*/\1asterisk/' /etc/php-fpm.d/www.conf
+        sudo sed -i 's/\(^group = \).*/\1asterisk/' /etc/php-fpm.d/www.conf
+        sudo sed -i 's/\(^listen.acl_users = \).*/\1apache,nginx,asterisk/' /etc/php-fpm.d/www.conf
+        sudo systemctl restart php-fpm httpd
+        sudo systemctl enable php-fpm httpd
+
+    - name: Update Asterisk configfile to work with FreePBX
+      ansible.builtin.template:
+        src: templates/asterisk/asterisk.conf.j2
+        dest: /etc/asterisk/asterisk.conf
+      become: yes
+
+    - name: Download FreePBX installation package
+      get_url:
+        url: "http://mirror.freepbx.org/modules/packages/freepbx/freepbx-{{freepbx_version}}-latest.tgz"
+        dest: /usr/src/
+      become: yes
+
+    - name: Extract freepbx
+      ansible.builtin.shell: |
+        cd /usr/src/
+        sudo tar xzf freepbx-{{freepbx_version}}-latest.tgz
+
+    - name: Install Freepbx
+      ansible.builtin.shell: |
+        cd /usr/src/freepbx
+        # sudo systemctl stop asterisk
+        sudo ./start_asterisk start
+        sudo ./install -n
+
+    - name: Install plugins 
+      ansible.builtin.shell: |
+        sudo fwconsole ma disablerepo commercial
+        sudo fwconsole ma installall
+        sudo fwconsole ma downloadinstall cxpanel
+        sudo fwconsole ma downloadinstall backup
+        sudo fwconsole ma delete firewall
+        sudo fwconsole reload
+        sudo fwconsole restart
+        sudo yum upgrade -y
+        sudo fwconsole chown
+        sudo fwconsole ma refreshsignatures
+        sudo fwconsole ma upgradeall
+        sudo fwconsole chown
+        sudo fwconsole reload
+        sudo fwconsole restart
+
+    - name: restart php-fpm
+      systemd:
+        name: php-fpm
+        state: restarted
+
+    - name: restart httpd
+      systemd:
+        name: httpd
+        state: restarted
+
+    - name: Create freepbx systemd startup script
+      ansible.builtin.shell: |
+        sudo tee /etc/systemd/system/freepbx.service<<EOF
+        [Unit]
+        Description=FreePBX VoIP Server
+        After=mariadb.service
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/fwconsole start -q
+        ExecStop=/usr/sbin/fwconsole stop -q
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+
+    - name: Install iSynmphony server
+      ansible.builtin.shell: |
+        wget https://www.getisymphony.com/files/builds/isymphony/iSymphonyV3-latest.noarch.rpm --no-check-certificate
+        sudo rpm -Uhv  iSymphonyV3-latest.noarch.rpm
+        sudo systemctl start iSymphonyServerV3
+        sudo systemctl enable iSymphonyServerV3
+
+    - name: Realod daemon and enable freepbx
+      ansible.builtin.shell: |
+        sudo systemctl daemon-reload
+        sudo systemctl enable freepbx
+        sudo systemctl start freepbx
+
+
+
+
+
+
