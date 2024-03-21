@@ -1,0 +1,18 @@
+
+
+Debian
+sudo apt install linux-headers-amd64
+
+Ubuntu
+sudo apt install linux-headers-generic
+
+CentOS (untested)
+sudo yum -y install kernel-headers kernel-devel
+
+
+lsmod | grep vboxsf
+sudo modprobe vboxsf
+
+# En cas de besoin, ne pas installer par defaut !!!
+vagrant plugin install vagrant-vbguest
+vagrant plugin install vagrant-winnfsd

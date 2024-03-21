@@ -1,7 +1,7 @@
 define host {
     use             linux-server
     host_name       dhcp-server
-    alias           dhcp.fadhel.gretta.fr
+    alias           dhcp.devops6080.com
     address         192.168.56.71
     check_command   check-host-alive
     max_check_attempts 5
@@ -12,11 +12,10 @@ define host {
     notification_interval 30
     notification_period 24x7
 }
-
 define host {
     use             linux-server
     host_name       dns-server
-    alias           dns.fadhel.gretta.fr
+    alias           dns.devops6080.com
     address         192.168.56.72
     check_command   check-host-alive
     max_check_attempts 5
@@ -27,11 +26,10 @@ define host {
     notification_interval 30
     notification_period 24x7
 }
-
 define host {
     use             linux-server
     host_name       nas-server
-    alias           nas.fadhel.gretta.fr
+    alias           nas.devops6080.com
     address         192.168.56.73
     check_command   check-host-alive
     max_check_attempts 5
@@ -42,11 +40,10 @@ define host {
     notification_interval 30
     notification_period 24x7
 }
-
 define host {
     use             linux-server
     host_name       ntp-server
-    alias           ntp.fadhel.gretta.fr
+    alias           ntp.devops6080.com
     address         192.168.56.74
     check_command   check-host-alive
     max_check_attempts 5
@@ -57,11 +54,10 @@ define host {
     notification_interval 30
     notification_period 24x7
 }
-
 define host {
     use             linux-server
     host_name       snort-server
-    alias           snort.fadhel.gretta.fr
+    alias           snort.devops6080.com
     address         192.168.56.75
     check_command   check-host-alive
     max_check_attempts 5
@@ -72,12 +68,25 @@ define host {
     notification_interval 30
     notification_period 24x7
 }
-
 define host {
     use             linux-server
     host_name       nagios-server
-    alias           nagios.fadhel.gretta.fr
+    alias           nagios.devops6080.com
     address         192.168.56.76
+    check_command   check-host-alive
+    max_check_attempts 5
+    check_interval  5
+    retry_interval  1
+    check_period    24x7
+    notification_options d,r
+    notification_interval 30
+    notification_period 24x7
+}
+define host {
+    use             linux-server
+    host_name       asterisk-server
+    alias           asterisk.devops6080.com
+    address         192.168.56.77
     check_command   check-host-alive
     max_check_attempts 5
     check_interval  5
@@ -101,6 +110,17 @@ define service {
 ############# DISK ################################
 define service {
     use                     generic-service
+    host_name               asterisk-server
+    service_description     DISK
+    check_command           check_nrpe!check_disk!-a '-w 20% -c 10% -p /dev/sda1'
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+define service {
+    use                     generic-service
     host_name               nagios-server
     service_description     DISK
     check_command           check_nrpe!check_disk!-a '-w 20% -c 10% -p /dev/sda1'
@@ -165,35 +185,11 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 
 ############# SSH ################################
-
 define service {
     use                     generic-service
-    host_name               nagios-server
-    service_description     SSH
-    check_command           check_ssh
-    retry_interval          1
-    check_interval          1
-    notification_period     24x7
-    check_period            24x7
-    contact_groups          admins
-}
-define service {
-    use                     generic-service
-    host_name               ntp-server
-    service_description     SSH
-    check_command           check_ssh
-    retry_interval          1
-    check_interval          1
-    notification_period     24x7
-    check_period            24x7
-    contact_groups          admins
-}
-define service {
-    use                     generic-service
-    host_name               nas-server
+    host_name               dhcp-server
     service_description     SSH
     check_command           check_ssh
     retry_interval          1
@@ -215,6 +211,28 @@ define service {
 }
 define service {
     use                     generic-service
+    host_name               nas-server
+    service_description     SSH
+    check_command           check_ssh
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+define service {
+    use                     generic-service
+    host_name               ntp-server
+    service_description     SSH
+    check_command           check_ssh
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+define service {
+    use                     generic-service
     host_name               snort-server
     service_description     SSH
     check_command           check_ssh
@@ -226,7 +244,18 @@ define service {
 }
 define service {
     use                     generic-service
-    host_name               dhcp-server
+    host_name               nagios-server
+    service_description     SSH
+    check_command           check_ssh
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+define service {
+    use                     generic-service
+    host_name               asterisk-server
     service_description     SSH
     check_command           check_ssh
     retry_interval          1
@@ -250,7 +279,6 @@ define service {
 }
 
 ####### MEMORY ##############################
-
 define service {
     use                     generic-service
     host_name               dhcp-server
@@ -262,7 +290,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               dns-server
@@ -274,7 +301,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nas-server
@@ -286,7 +312,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               ntp-server
@@ -298,7 +323,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               snort-server
@@ -310,7 +334,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nagios-server
@@ -322,10 +345,19 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
+define service {
+    use                     generic-service
+    host_name               asterisk-server
+    service_description     MEMORY
+    check_command           check_nrpe!check_mem
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
 
-
-####### load ##############################
-
+####### LOAD ##############################
 define service {
     use                     generic-service
     host_name               dhcp-server
@@ -337,7 +369,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               dns-server
@@ -349,7 +380,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nas-server
@@ -361,7 +391,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               ntp-server
@@ -373,7 +402,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               snort-server
@@ -385,10 +413,20 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nagios-server
+    service_description     LOAD
+    check_command           check_nrpe!check_load
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+define service {
+    use                     generic-service
+    host_name               asterisk-server
     service_description     LOAD
     check_command           check_nrpe!check_load
     retry_interval          1
@@ -399,7 +437,6 @@ define service {
 }
 
 ####### SWAP ##############################
-
 define service {
     use                     generic-service
     host_name               dhcp-server
@@ -411,7 +448,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               dns-server
@@ -423,7 +459,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nas-server
@@ -435,7 +470,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               ntp-server
@@ -447,7 +481,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               snort-server
@@ -459,10 +492,20 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nagios-server
+    service_description     SWAP
+    check_command           check_nrpe!check_swap
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+define service {
+    use                     generic-service
+    host_name               asterisk-server
     service_description     SWAP
     check_command           check_nrpe!check_swap
     retry_interval          1
@@ -484,7 +527,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               dns-server
@@ -496,7 +538,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nas-server
@@ -508,7 +549,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               ntp-server
@@ -520,7 +560,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               snort-server
@@ -532,10 +571,20 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nagios-server
+    service_description     TOTAL PROCS
+    check_command           check_nrpe!check_total_procs
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
+define service {
+    use                     generic-service
+    host_name               asterisk-server
     service_description     TOTAL PROCS
     check_command           check_nrpe!check_total_procs
     retry_interval          1
@@ -557,7 +606,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               dns-server
@@ -569,7 +617,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nas-server
@@ -581,7 +628,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               ntp-server
@@ -593,7 +639,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               snort-server
@@ -605,7 +650,6 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
 define service {
     use                     generic-service
     host_name               nagios-server
@@ -617,6 +661,16 @@ define service {
     check_period            24x7
     contact_groups          admins
 }
-
+define service {
+    use                     generic-service
+    host_name               asterisk-server
+    service_description     CURRENT USERS
+    check_command           check_nrpe!check_users
+    retry_interval          1
+    check_interval          1
+    notification_period     24x7
+    check_period            24x7
+    contact_groups          admins
+}
 
 #######  FIN #####################
