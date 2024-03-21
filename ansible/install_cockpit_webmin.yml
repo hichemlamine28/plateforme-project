@@ -1,7 +1,7 @@
 ---
 - name: Setup Cockpit and Webmin on all hosts
   hosts: all
-  # hosts: "dhcp:dns:nas:ntp:snort:nagios"
+  # hosts: "dhcp:dns:nas:ntp:snort:nagios:asterisk"
   become: true
   tasks:
   - name: Install Cockpit package
