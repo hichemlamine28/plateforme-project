@@ -17,7 +17,7 @@
 
 - name: Install and configure nagios
   ansible.builtin.shell: |
-    sudo yum -y install httpd httpd-tools php gcc glibc glibc-common wget perl gd gd-devel unzip zip tar
+    sudo yum -y install httpd httpd-tools php gcc glibc glibc-common wget perl gd gd-devel unzip zip tar python3-passlib
     sudo useradd nagios
     sudo groupadd nagcmd
     sudo usermod -a -G nagcmd nagios
