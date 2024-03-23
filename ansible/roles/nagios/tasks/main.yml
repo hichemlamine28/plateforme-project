@@ -77,7 +77,7 @@
   ansible.builtin.replace:
     path: /usr/local/nagios/etc/objects/contacts.cfg
     regexp: '    email\s+.*;.*$'
-    replace: '    email                   hichemlamine@gmail.com ;'
+    replace: '    email                  devops6080@gmail.com ;'
 
 - name: Configure Nagios hosts in hosts.cfg file
   template:

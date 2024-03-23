@@ -311,7 +311,13 @@ sudo fwconsole ma downloadinstall backup
 sudo fwconsole ma delete firewall
 sudo fwconsole reload
 sudo fwconsole restart
-
+sudo yum upgrade -y
+sudo fwconsole chown
+sudo fwconsole ma refreshsignatures
+sudo fwconsole ma upgradeall
+sudo fwconsole chown
+sudo fwconsole reload
+sudo fwconsole restart
 
 
 sudo systemctl restart httpd php-fpm
@@ -337,12 +343,7 @@ sudo systemctl enable freepbx
 sudo systemctl start freepbx
 
 
-sudo yum upgrade -y
-sudo fwconsole chown
-sudo fwconsole ma refreshsignatures
-sudo fwconsole ma upgradeall
-sudo fwconsole chown
-sudo fwconsole reload
+
 
 
 #### mongodb

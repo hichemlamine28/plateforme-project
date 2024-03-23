@@ -1,4 +1,69 @@
 
+wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] http://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+
+sudo apt update
+
+sudo apt install gcc-12 virtualbox-7.0
+
+vboxmanage -v | cut -dr -f1
+
+wget https://download.virtualbox.org/virtualbox/7.0.14/Oracle_VM_VirtualBox_Extension_Pack-7.0.14.vbox-extpack
+
+sudo vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-7.0.14.vbox-extpack -y
+
+vboxmanage list extpacks
+
+sudo usermod -a -G vboxusers $USER
+
+groups $USER
+
+
+
+sudo apt install linux-headers-amd64
+lsmod | grep vboxsf
+sudo modprobe vboxsf
+
+# En cas de besoin, ne pas installer par defaut !!!
+vagrant plugin install vagrant-vbguest
+vagrant plugin install vagrant-winnfsd
+
+
+
+#################################################################""
+sudo apt update && sudo apt upgrade 
+
+wget https://www.virtualbox.org/download/oracle_vbox_2016.asc 
+cat oracle_vbox_2016.asc | gpg --dearmor | sudo tee /usr/share/keyrings/virtualbox.gpg > /dev/null 2>&1
+
+sudo nano /etc/apt/sources.list.d/virtualbox.list  
+'''
+deb [arch=amd64 signed-by=/usr/share/keyrings/virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian jammy contrib
+'''
+
+
+sudo apt update  
+sudo apt install virtualbox-7.0  
+
+
+
+sudo apt install -y linux-headers-$(uname -r) dkms
+
+VBoxManage --version
+
+sudo apt install vagrant
+
+
+
+$ curl https://www.virtualbox.org/download/oracle_vbox_2016.asc | gpg --dearmor > oracle_vbox_2016.gpg
+$ curl https://www.virtualbox.org/download/oracle_vbox.asc | gpg --dearmor > oracle_vbox.gpg
+$ sudo install -o root -g root -m 644 oracle_vbox_2016.gpg /etc/apt/trusted.gpg.d/
+$ sudo install -o root -g root -m 644 oracle_vbox.gpg /etc/apt/trusted.gpg.d/
+
+
+
+
 
 Debian
 sudo apt install linux-headers-amd64
@@ -16,3 +81,50 @@ sudo modprobe vboxsf
 # En cas de besoin, ne pas installer par defaut !!!
 vagrant plugin install vagrant-vbguest
 vagrant plugin install vagrant-winnfsd
+
+
+
+##############################################################""
+
+
+wget https://download.virtualbox.org/virtualbox/6.1.50/Oracle_VM_VirtualBox_Extension_Pack-6.1.50.vbox-extpack
+
+sudo vboxmanage extpack install Oracle_VM_VirtualBox_Extension_Pack-6.1.50.vbox-extpack --replace
+
+
+
+
+
+
+##########################   REPACK BOX  VAGRANT  ##############################
+
+wget https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub -O .ssh/authorized_keys
+chmod 700 .ssh
+chmod 600 .ssh/authorized_keys
+chown -R vagrant:vagrant .ssh
+
+
+
+VBoxManage list vms
+
+vagrant package --base <a3f59eed-b9c5-4a5f-9977-187f8eb8c4d4> --output <name-of-your-box>.box
+
+
+
+
+####################  VBOX SF  ######################
+
+pkg install -y git bash
+
+git clone https://github.com/freebsd/freebsd-ports.git /usr/ports
+
+cd /usr/ports/emulators/virtualbox-ose-additions
+
+make install clean
+
+
+
+#########################
+
+pkg install virtualbox-ose-additions
+sysrc vboxguest_enable="YES" vboxservice_enable="YES"
