@@ -1,3 +1,14 @@
+alert icmp any any -> any any ( msg:"Alert PING Attack"; dsize:>5000; sid:10005; rev:001;)
 alert icmp any any -> $HOME_NET any (msg:"ICMP Packets Found"; sid:10001; rev:001;)
-alert tcp any any -> $HOME_NET any (msg:"TCP SYN flood attack Dtected"; sid:10002; rev:001;)
+
+# cette regle est desactivé pour evité un bouclage infiine tcp (port 22 par exemple)
+#alert tcp any any -> $HOME_NET any (msg:"TCP SYN flood attack Dtected"; sid:10002; rev:001;)
+
 alert udp any any -> $HOME_NET any (msg:"DOS tool UDP mode detected"; sid:10003; rev:001;)
+
+
+drop icmp 192.168.56.73 any -> 192.168.56.75 any ( msg:"Alert PING Attack"; dsize:>5000; sid:10007; rev:001;)
+drop icmp 192.168.56.73 any -> 192.168.56.75 any (msg:"ICMP Packets Found"; sid:10008; rev:001;)
+
+drop icmp 192.168.56.75 any -> 192.168.56.73 any ( msg:"Alert PING Attack"; dsize:>5000; sid:10007; rev:001;)
+drop icmp 192.168.56.75 any -> 192.168.56.73 any (msg:"ICMP Packets Found"; sid:10008; rev:001;)
