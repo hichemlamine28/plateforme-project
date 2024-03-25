@@ -32,5 +32,8 @@ sudo apt install python-pip -y
 sudo apt-get install python3.10-venv -y
 sudo apt install python3-pip -y
 sudo pip install passlib
+sudo apt install git -y
+sudo apt install terminator -y
+sudo apt install gh -y
 
 
