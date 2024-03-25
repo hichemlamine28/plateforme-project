@@ -2,6 +2,7 @@ relayhost = [smtp-relay.brevo.com]:587
 #relayhost = [smtp.mailgun.com]:587
 #relayhost = [smtp.elasticemail.com]:2525
 #relayhost = [mail.spacemail.com]:465
+#relayhost = [in-v3.mailjet.com]:587
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
 smtp_sasl_security_options = noanonymous
@@ -10,4 +11,4 @@ smtp_tls_CAfile = /etc/postfix/smtp_tls_cert.pem
 
 #smtp_tls_wrappermode = yes
 inet_protocols = ipv4
-myorigin = devops6080@gmail.com
+myorigin = devops6080.com
