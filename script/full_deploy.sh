@@ -23,3 +23,5 @@ ansible-playbook -i ../ansible/inventory ../ansible/install_nagios.yml
 
 ansible-playbook -i ../ansible/inventory ../ansible/install_cockpit_webmin.yml
 
+ansible-playbook -i ../ansible/inventory ../ansible/install_web.yml
+
