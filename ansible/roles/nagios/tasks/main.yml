@@ -77,8 +77,7 @@
   ansible.builtin.replace:
     path: /usr/local/nagios/etc/objects/contacts.cfg
     regexp: '    email\s+.*;.*$'
-    # replace: '    email                  devops6080@gmail.com ;'
-    replace: '    email                  chebil.fadhel@gmail.com ;'
+    replace: '    email                  devops6080@gmail.com ;'
 
 - name: Configure Nagios hosts in hosts.cfg file
   template:
@@ -108,7 +107,7 @@
 
 - name: generate key and crt self signed certificates
   shell:
-    cmd: "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/nagios.key -out /etc/pki/tls/certs/nagios.crt -subj '/C=FR/ST=France/L=Paris/O=greta/OU=fadhel/CN={{domain}}'"
+    cmd: "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/nagios.key -out /etc/pki/tls/certs/nagios.crt -subj '/C=FR/ST=France/L=Paris/O=devops6080/OU=hichemlamine/CN={{domain}}'"
 
 - name: Change permissions for Nagios SSL certificate
   become: true

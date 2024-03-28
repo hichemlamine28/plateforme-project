@@ -2,7 +2,7 @@
 define host {
     use             linux-server
     host_name       host{{ host_num }}
-    alias           host{{ host_num }}.fadhel.gretta.fr
+    alias           host{{ host_num }}.devops6080.com
     address         192.168.56.{{ host_num }}
     check_command   check-host-alive
     max_check_attempts 5

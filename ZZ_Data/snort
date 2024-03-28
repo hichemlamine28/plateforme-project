@@ -67,6 +67,8 @@ for logs use this command:
 
 Other VMs:
 ping 192.168.56.75 
+ping 192.168.56.75 -s 10000
+
 nmap -v -A 192.168.56.75 -e eth1
 ftp 192.168.56.75 21
 

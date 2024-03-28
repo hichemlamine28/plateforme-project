@@ -15,7 +15,7 @@
 
     - name: Generate self signed certificates and Fix semange for nginx
       ansible.builtin.shell: |
-        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /var/web/cert.key -out /var/web/cert.crt -subj '/C=FR/ST=France/L=Paris/O=greta/OU=fadhel/CN=inpackt.tn'
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /var/web/cert.key -out /var/web/cert.crt -subj '/C=FR/ST=France/L=Paris/O=devops6080/OU=hichemlamine/CN=devops6080.com'
         sudo chmod 644 /var/web/cert*
         sudo chown nginx:nginx /var/web/cert*
         sudo yum search policycoreutils

@@ -1,7 +1,7 @@
 define host {
     use             linux-server
     host_name       dhcp-server
-    alias           dhcp@inpackt.tn
+    alias           dhcp@devops6080.com
     address         192.168.56.71
     check_command   check-host-alive
     max_check_attempts 5
@@ -15,7 +15,7 @@ define host {
 define host {
     use             linux-server
     host_name       dns-server
-    alias           dns@inpackt.tn
+    alias           dns@devops6080.com
     address         192.168.56.72
     check_command   check-host-alive
     max_check_attempts 5
@@ -29,7 +29,7 @@ define host {
 define host {
     use             linux-server
     host_name       nas-server
-    alias           nas@inpackt.tn
+    alias           nas@devops6080.com
     address         192.168.56.73
     check_command   check-host-alive
     max_check_attempts 5
@@ -43,7 +43,7 @@ define host {
 define host {
     use             linux-server
     host_name       ntp-server
-    alias           ntp@inpackt.tn
+    alias           ntp@devops6080.com
     address         192.168.56.74
     check_command   check-host-alive
     max_check_attempts 5
@@ -57,7 +57,7 @@ define host {
 define host {
     use             linux-server
     host_name       snort-server
-    alias           snort@inpackt.tn
+    alias           snort@devops6080.com
     address         192.168.56.75
     check_command   check-host-alive
     max_check_attempts 5
@@ -71,7 +71,7 @@ define host {
 define host {
     use             linux-server
     host_name       nagios-server
-    alias           nagios@inpackt.tn
+    alias           nagios@devops6080.com
     address         192.168.56.76
     check_command   check-host-alive
     max_check_attempts 5
@@ -85,7 +85,7 @@ define host {
 define host {
     use             linux-server
     host_name       asterisk-server
-    alias           asterisk@inpackt.tn
+    alias           asterisk@devops6080.com
     address         192.168.56.77
     check_command   check-host-alive
     max_check_attempts 5

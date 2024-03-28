@@ -1,9 +1,8 @@
 Vagrant.configure("2") do |config|
 
   # Configuration de la box CentOS 8
-  config.vm.box = "centos/8"
-  # config.vm.box = "hichemlamine/centos8"
-  # config.ssh.private_key_path = "~/.ssh/id_rsa"
+  # config.vm.box = "centos/8"
+  config.vm.box = "hichemlamine/centos8"
 
   # Provisionnement personnalisé pour ajouter la clé publique à authorized_keys
   config.ssh.insert_key = false
@@ -103,10 +102,6 @@ Vagrant.configure("2") do |config|
   
   # Configuration de la huitième machine virtuelle (vm8)
   config.vm.define "pfsense" do |node|
-    # node.vm.box = "xenomii/pfsense-2.6.0" #KO vbgeust problem , must relaunch UP        
-    # node.vm.box = "gutobrutus/pfsense2.6.0" #KO vbgeust problem , must relaunch UP
-    # node.vm.box = "ksklareski/pfsense-ce" #OK NO GUI Update
-    # node.vm.box = "madinasoc2030/pfsense"  #KO vbgeust problem , must relaunch UP
     node.vm.box = "hichemlamine/pfsense-2.7.2"
     node.ssh.shell = 'sh'
     # node.ssh.insert_key = false
