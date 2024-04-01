@@ -1,0 +1,33 @@
+---
+- name: Configure NTP server
+  hosts: all
+  become: true
+  tasks:
+    - name: Create /var/web/ directory
+      file:
+        path: /var/web
+        state: directory
+
+    - name: Copy web Inteface page to /var/www/html folder
+      copy:
+        src: files/web/index.html
+        dest: /var/www/html/
+
+    - name: Generate self signed certificates and Fix semange for nginx
+      ansible.builtin.shell: |
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /var/web/cert.key -out /var/web/cert.crt -subj '/C=FR/ST=France/L=Paris/O=devops6080/OU=hichemlamine/CN=devops6080.com'
+        sudo chmod 644 /var/web/cert*
+        sudo chown nginx:nginx /var/web/cert*
+        sudo yum search policycoreutils
+        sudo yum install policycoreutils-python-utils -y
+        sudo semanage fcontext -a -t httpd_sys_content_t '/var/web/cert.crt'
+        sudo semanage fcontext -a -t httpd_sys_content_t '/var/web/cert.key'
+        sudo semanage fcontext -a -t cert_t "/var/web/cert.crt"
+        sudo semanage fcontext -a -t cert_t "/var/web/cert.key"
+        ls -Z /var/web/cert.crt
+        sudo restorecon -v '/var/web/cert.crt'
+        sudo restorecon -v /var/web/cert.key
+
+    - name: Install nginx
+      ansible.builtin.import_role: 
+        name: nginx

@@ -1,0 +1,9 @@
+
+uname -sr
+sudo dnf install https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm -y
+sudo dnf --disablerepo="*" --enablerepo="elrepo-kernel" list available
+sudo dnf --enablerepo=elrepo-kernel install kernel-ml -y
+sudo grubby --default-kernel
+sudo reboot
+
+

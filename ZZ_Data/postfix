@@ -1,0 +1,155 @@
+sudo yum install postfix -y
+
+sudo nano /etc/postfix/main.cf
+
+'''
+# Utiliser Gmail comme serveur SMTP pour les relais sortants
+relayhost = [smtp.gmail.com]:587 devops6080@gmail.com:password
+
+#smtp_use_tls = no
+#smtp_tls_security_level = none
+
+smtp_use_tls = yes
+smtp_tls_security_level = encrypt
+
+smtp_sasl_auth_enable = yes
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_tls_CAfile = /etc/postfix/smtp_tls_cert.pem
+smtp_use_tls = yes
+
+inet_protocols = ipv4
+myorigin = hichemlamine.devops.com
+'''
+
+
+'''
+relayhost = [smtp-relay.sendinblue.com]:587
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = static:devops6080@gmail.com:'<pass>'
+smtp_sasl_security_options = noanonymous
+smtp_tls_security_level = may
+
+inet_protocols = ipv4
+myorigin = hichemlamine.devops.com
+
+'''
+
+
+
+'''
+relayhost = [smtp.mailgun.com]:587
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/postfix/smtp_tls_cert.pem
+
+#smtp_tls_wrappermode = yes
+inet_protocols = ipv4
+myorigin = hichemlamine.devops.com
+'''
+
+cd /tm/
+sudo openssl s_client -showcerts -connect smtp.gmail.com:587 -starttls smtp -tls1_2 </dev/null | openssl x509 -outform PEM > smtp_tls_cert.pem
+sudo cp smtp_tls_cert.pem /etc/postfix
+
+
+sudo nano -c /etc/postfix/sasl_passwd
+'''
+[smtp.mailgun.com]:587  postmaster@sandboxccd5b1285bfd4bd78531fdf52097bfbd.mailgun.org:<ke>
+'''
+sudo postmap /etc/postfix/sasl_passwd
+
+
+'''
+
+[smtp-relay.brevo.com]:587	devops6080@gmail.com:<pass>
+[smtp.mailgun.com]:587          postmaster@sandboxccd5b1285bfd4bd78531fdf52097bfbd.mailgun.org:<key>
+[smtp.elasticemail.com]:2525    devops6080@gmail.com:<key>
+[smtp.elasticemail.com]:2525    hichemlamine@gmail.com:<key>
+[mail.spacemail.com]:587        hello@azurehacks.io:<key>
+
+'''
+
+
+
+
+
+
+https://app.mailjet.com/account/relay
+
+
+relayhost = in-v3.mailjet.com:587
+smtp_tls_security_level = encrypt
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = static:apikey:<key>
+smtp_sasl_security_options = noanonymous
+
+inet_protocols = ipv4
+myorigin = hichemlamine.devops.com
+
+
+
+
+
+
+
+brevo:
+
+devops6080@gmail.com
+
+'''
+relayhost = [smtp-relay.brevo.com]:587
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/postfix/smtp_tls_cert.pem
+
+#smtp_tls_wrappermode = yes
+inet_protocols = ipv4
+myorigin = hichemlamine.devops.com
+'''
+
+
+sudo nano -c /etc/postfix/sasl_passwd
+'''
+[smtp-relay.brevo.com]:587  devops6080@gmail.com:<pass>
+'''
+
+sudo postmap /etc/postfix/sasl_passwd
+
+
+
+#########################
+
+elastic mail
+
+[smtp.elasticemail.com]:2525    devops6080@gmail.com:<pass>
+[smtp.elasticemail.com]:2525    hichemlamine@gmail.com:<pass>
+
+
+SMTPS:
+
+[mail.spacemail.com]:587 hello@azurehacks.io:<pass_anas_bo>
+
+
+# Test from host:
+
+sudo yum install mailx -y
+
+echo "Subject:  Test from nagios server  BREVO " | sendmail -v hichemlamine@gmail.com
+echo "Test Postfix BREVO smtp on nagios server" | mail -s "Postfix Brevo relay" hichemlamine@gmail.com
+
+echo "Subject:  Test from nagios server  MAILGUN " | sendmail -v hichemlamine@gmail.com
+echo "Test Postfix MAILGUN smtp on nagios server" | mail -s "Postfix MAILGUN relay" hichemlamine@gmail.com
+
+echo "Test Postfix ELASTIC MAIL smtp on nagios server" | mail -s "Postfix ELASTIC MAIL relay" hichemlamine@gmail.com
+
+echo "Test Postfix MAIL SPACE MAIL smtp on nagios server" | mail -s "Postfix  MAIL SPACE  MAIL relay" hichemlamine@gmail.com
+
+
+TLS  SSL
+openssl s_client -starttls smtp -crlf -connect smtp-relay.brevo.com:587
+

@@ -7,6 +7,10 @@ if [[ $# -eq 0 ]]; then
     exit 1
 elif [[ "$1" == "all" ]]; then
         vagrant up
-    else
-        vagrant up "$1"
+        vagrant up pfsense
+    elif [[ "$1" == "pfsense" ]]; then
+        vagrant up pfsense
+        vagrant up pfsense
+        else
+            vagrant up "$1"
 fi

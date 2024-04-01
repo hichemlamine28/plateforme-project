@@ -4,16 +4,17 @@
   become: true
   vars:
     named_conf_path: "/etc/named.conf"
-    zones_dir: "/var/named/"
+    zones_dir: "/var/named"
     named_service: "named"
     dns_port: 53
     dns_forwarders:
       - 8.8.8.8
       - 8.8.4.4
-    domain: "devops.fr"
-    reverse_zone: "56.168.192.in-addr.arpa"
-    server_ip: "192.168.56.72"
-    server_ip_reversed: "72"
+    domain: "devops.local"
+    reverse_zone: "1.168.192"
+    server_ip: "192.168.1.100"
+    server_ip_reversed: "100"
+    mask: "192.168.1.0"
 
   tasks:
     - name: Installer le paquet bind
@@ -22,21 +23,47 @@
         state: present
 
     - name: Copier la configuration named.conf
-      template:
+      ansible.builtin.template:
         src: templates/dns/named.conf.j2
         dest: "{{ named_conf_path }}"
-      notify: Reload BIND
+      # notify: Reload BIND
 
     - name: Copier les fichiers de zone
-      copy:
+      ansible.builtin.template:
         src: "{{ item.src }}"
         dest: "{{ zones_dir }}/{{ item.dest }}"
       with_items:
-        - { src: "templates/dns/forward.zone.j2", dest: "forward.zone" }
-        - { src: "templates/dns/reverse.zone.j2", dest: "reverse.zone" }
-      notify: Reload BIND
+        - { src: "templates/dns/forward.db.j2", dest: "forward.db" }
+        - { src: "templates/dns/reverse.db.j2", dest: "reverse.db" }
+      # notify: Reload BIND
 
-  handlers:
+    - name: Changer owner et chmod pour fichiers de zone
+      ansible.builtin.shell: |
+        sudo chmod 640 /var/named/forward.db
+        sudo chmod 640 /var/named/reverse.db
+        sudo chown named:named /var/named/forward.db
+        sudo chown named:named /var/named/reverse.db
+
+    - name: Restart Networkmanager
+      ansible.builtin.shell: sudo systemctl restart NetworkManager
+
+    # - name: Ajouter la ligne nameserver dans /etc/resolv.conf
+    #   lineinfile:
+    #     path: /etc/resolv.conf
+    #     # line: "nameserver {{ server_ip }}"
+    #     line: "nameserver 192.168.56.1"
+    #     insertafter: EOF
+    #   become: yes
+
+    - name: Remplacer le contenu de /etc/resolv.conf
+      lineinfile:
+        path: /etc/resolv.conf
+        regexp: '^nameserver'
+        line: 'nameserver 192.168.56.72'
+        state: present
+      become: true
+
+  # handlers:
     - name: Reload BIND
       systemd:
         name: "{{ named_service }}"

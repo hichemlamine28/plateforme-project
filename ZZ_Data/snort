@@ -51,8 +51,14 @@ sudo systemctl status snortd
 Test Config snort:
 sudo snort -T -c /etc/snort/snort.conf 
 
+
+
+
 Console snort :
-sudo snort -A console -q -c /etc/snort/snort.conf
+sudo snort -i eth1 -A console -q -c /etc/snort/snort.conf
+
+sudo snort -i eth1 -c /etc/snort/snort.conf -A console
+
 
 for logs use this command:
                 sudo snort -r /var/log/snort/snort.log.1710601354
@@ -61,5 +67,29 @@ for logs use this command:
 
 Other VMs:
 ping 192.168.56.75 
-nmap -v -A 192.168.56.75
+ping 192.168.56.75 -s 10000
+
+nmap -v -A 192.168.56.75 -e eth1
+ftp 192.168.56.75 21
+
+
+
+ping -c 1 192.168.56.75
+
+
+nc 192.168.56.75 80
+
+
+echo "Test UDP packet" | nc -u -w1 192.168.56.75 22
+
+
+
+
+
+
+
+
+
+
+
 

@@ -19,8 +19,13 @@
 [asterisk]
 192.168.56.77
 
+#[pfsense]
+#192.168.56.78
+
 [all:vars]
 ansible_ssh_user=vagrant
 remote_user=vagrant
 private-key=~/.ssh/id_rsa
 
+#[pfsense:vars]
+#ansible_ssh_pass=vagrant

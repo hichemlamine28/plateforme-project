@@ -4,27 +4,48 @@
     name: nginx
     state: present
 
+- name: Enable dnf module nginx 
+  ansible.builtin.shell: |
+    sudo dnf module reset nginx -y
+    sudo dnf module enable nginx:1.20 -y
+    sudo dnf install nginx -y
+
+
 - name: Install Nginx
   package:
     name: nginx
     state: present
-    
-- name: Create /etc/nginx/certs/
-  file:
-    path: /etc/nginx/certs/
-    state: directory
 
-- name: generate key and crt self signed certificates
-  shell:
-    cmd: "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/pki/tls/private/nagios.key -out /etc/pki/tls/certs/nagios.crt -subj '/C=FR/ST=France/L=Paris/O=greta/OU=fadhel/CN={{domain}}'"
+- name: Reinstall Nginx to Fix module ssl trouble
+  ansible.builtin.shell: |
+    sudo yum remove nginx -y
+    sudo yum install nginx -y
 
-# - name: Copy SSL certificate and key
-#   copy:
-#     src: /etc/nginx/ssl/{{ domain }}.crt
-#     dest: /etc/nginx/ssl/{{ domain }}.crt
+# Si on veut liberer le port 80 pour autres services    
+- name: Remplacer le port 80 par 8080 dans nginx.conf
+  ansible.builtin.replace:
+    path: /etc/nginx/nginx.conf
+    regexp: '(^\s*listen\s+)80(;?\s*$)'
+    replace: '\1 8080\2'
+
+# - name: Remplacer [::]:80 par [::]:8080 dans nginx.conf
+#   ansible.builtin.replace:
+#     path: /etc/nginx/nginx.conf
+#     regexp: '(^\s*listen\s+\[::\]:)80(;?\s*$)'
+#     replace: '\1 8080\2'
+
+- name: Commenter la ligne listen [::]:80 dans nginx.conf
+  ansible.builtin.replace:
+    path: /etc/nginx/nginx.conf
+    regexp: '^\s*listen\s+\[::\]:80;'
+    replace: '# \g<0>'
 
 
-- name: Configure Nginx for Nagios
+- name: Reinstall Nginx to Fix module ssl trouble
+  ansible.builtin.shell: |
+    sudo systemctl restart nginx
+
+- name: Copy Nginx personal config
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/conf.d/nginx.conf

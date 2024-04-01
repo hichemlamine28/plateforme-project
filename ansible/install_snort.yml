@@ -28,6 +28,14 @@
         - libnghttp2
         - xz-devel
         - wget
+        - vsftpd
+
+# start and enable vsftpd service
+    - name: restart snort
+      service:
+        name: vsftpd
+        state: restarted
+        enabled: true
 
     - name: Send ethtool commands
       ansible.builtin.shell: |

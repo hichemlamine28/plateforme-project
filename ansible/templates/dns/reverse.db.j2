@@ -1,0 +1,18 @@
+$TTL 86400
+@   IN  SOA     ns1.{{ domain }}. root.{{ domain }}. (
+                                       3           ;Serial
+                                       3600        ;Refresh
+                                       1800        ;Retry
+                                       604800      ;Expire
+                                       86400       ;Minimum TTL
+)
+
+;Name Server Information
+@         IN      NS         ns1.{{ domain }}.
+
+;Reverse lookup for Name Server
+{{ server_ip_reversed }}        IN  PTR     ns1.{{ domain }}.
+
+;PTR Record IP address to HostName
+101      IN  PTR     www.{{ domain }}.
+150      IN  PTR     mail.{{ domain }}.
