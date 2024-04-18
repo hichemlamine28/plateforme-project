@@ -26,7 +26,7 @@
 - name: Postmap sasl_passwd install mailx and enable postfix
   ansible.builtin.shell: |
     sudo postmap /etc/postfix/sasl_passwd
-    sudo chmod 600 /etc/postfix/sasl/sasl_passwd
+    sudo chmod 600 /etc/postfix/sasl_passwd
     sudo yum install -y mailx
     sudo yum install cyrus-sasl cyrus-sasl-plain -y
     sudo systemctl restart postfix
