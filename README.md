@@ -65,13 +65,11 @@ Ce projet permet de **déployer**, **configurer**, **détruire**, et **supervise
    cd plateforme-project
 
 
-
 Créer et activer l'environnement
 
    ```bash
    cd virtual_env
    ./config_ubuntu.sh
-
 
 
 Lancer le déploiement complet
