@@ -63,21 +63,21 @@ Ce projet permet de **déployer**, **configurer**, **détruire**, et **supervise
    ```bash
    git clone https://github.com/hichemlamine28/plateforme-project.git
    cd plateforme-project
-
+   ```
 
 Créer et activer l'environnement
 
    ```bash
    cd virtual_env
    ./config_ubuntu.sh
-
+   ```
 
 Lancer le déploiement complet
 
    ```bash
    cd script
    ./full_deploy.sh
-
+   ```
 
 ---
 
