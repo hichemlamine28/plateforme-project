@@ -1,9 +1,9 @@
 # 🛠️ Plateforme Virtualisée Automatisée : Déploiement, Supervision et Sécurité
 
-[![GitHub repo size](https://img.shields.io/github/repo-size/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/nom-du-repo)
-[![GitHub issues](https://img.shields.io/github/issues/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/nom-du-repo/issues)
-[![GitHub forks](https://img.shields.io/github/forks/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/nom-du-repo/network)
-[![GitHub stars](https://img.shields.io/github/stars/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/nom-du-repo/stargazers)
+[![GitHub repo size](https://img.shields.io/github/repo-size/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/plateforme-project)
+[![GitHub issues](https://img.shields.io/github/issues/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/plateforme-project/issues)
+[![GitHub forks](https://img.shields.io/github/forks/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/plateforme-project/network)
+[![GitHub stars](https://img.shields.io/github/stars/hichemlamine28/plateforme-project?style=flat-square)](https://github.com/hichemlamine28/plateforme-project/stargazers)
 [![GitHub license](https://img.shields.io/github/license/hichemlamine28/plateforme-project?style=flat-square)](LICENSE)
 
 <!-- Technologies -->
