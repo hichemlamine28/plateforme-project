@@ -46,9 +46,13 @@ Ce projet permet de **déployer**, **configurer**, **détruire**, et **supervise
 
 .
 ├── ZZ_Data/ # Explications détaillées, commandes, documentation
+
 ├── ansible/ # Playbooks & rôles Ansible pour automatisation complète
+
 ├── script/ # Scripts shell pour exécuter le cycle de vie de la plateforme
+
 ├── server/ # Fichier Vagrantfile et configuration des VMs
+
 └── virtual_env/ # Configuration de l’environnement virtuel Python
 
 
