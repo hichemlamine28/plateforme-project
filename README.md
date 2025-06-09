@@ -44,7 +44,6 @@ Ce projet permet de **déployer**, **configurer**, **détruire**, et **supervise
 
 ## 📁 Structure du projet
 
-.
 ├── ZZ_Data/ # Explications détaillées, commandes, documentation
 
 ├── ansible/ # Playbooks & rôles Ansible pour automatisation complète
@@ -55,15 +54,14 @@ Ce projet permet de **déployer**, **configurer**, **détruire**, et **supervise
 
 └── virtual_env/ # Configuration de l’environnement virtuel Python
 
-
 ---
 
 ## 🚀 Lancement rapide
 
 1. **Cloner le dépôt**
-   ```bash
-   git clone https://github.com/hichemlamine28/plateforme-project.git
-   cd plateforme-project
+```bash
+git clone https://github.com/hichemlamine28/plateforme-project.git
+cd plateforme-project
 
 Créer et activer l'environnement
 
@@ -78,13 +76,18 @@ Lancer le déploiement complet
 cd script
 ./full_deploy.sh
 
+---
+
 Si vous voulez deployer par partie étape par étape, vous aves des scripts séparés appelant le splaybooks ansible, sinon deployer via ansible directement, l'inventaire est dynamique.
 
 Une explication plus détaillé existe dans le dossier ZZ_Data
 
+---
 
 Accéder à l’interface (Nagios, pfSense, Cockpit, etc.)
 Utilisez les IPs définies dans le dossier ZZ_Data/docs/ ou la sortie des playbooks
+
+---
 
 📚 Documentation
 Toutes les explications détaillées sont dans le dossier ZZ_Data/. Vous y trouverez :
@@ -100,6 +103,7 @@ Toutes les explications détaillées sont dans le dossier ZZ_Data/. Vous y trouv
 🤝 Contribution
 Contributions, issues, discussions, idées et retours sont les bienvenus !
 
+---
 
 📄 Licence
 Ce projet est distribué sous licence MIT — Voir le fichier LICENSE.
